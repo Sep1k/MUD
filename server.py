@@ -1,6 +1,6 @@
 import socket
 
-HOST = '0.0.0.0'  # Kuulab kõiki võrguadaptereid
+HOST = '172.20.2.26'  # Kuulab kõiki võrguadaptereid
 PORT = 12345      # Port, mida kuulatakse
 
 # Loo socket
@@ -15,7 +15,10 @@ while True:
     print(f"Ühendus: {addr}")
 
     data = client_socket.recv(1024)  # Loe kuni 1024 baiti
-    if data:
+    if data:  # Kontrollime, et andmed pole tühjad
         print(f"Sõnum: {data.decode('utf-8')}")
+        if data.decode('utf-8') == "tere":
+            client_socket.sendall("tere".encode('utf-8'))
 
     client_socket.close()
+
