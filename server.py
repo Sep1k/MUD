@@ -1,6 +1,6 @@
 import socket
 
-HOST = '172.20.2.26'  # Kuulab kõiki võrguadaptereid
+HOST = '0.0.0.0'  # Kuulab kõiki võrguadaptereid
 PORT = 12345      # Port, mida kuulatakse
 
 # Loo socket
