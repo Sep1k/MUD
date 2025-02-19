@@ -1,7 +1,6 @@
 import winsound
 from tkinter import *
-import subprocess
-import sys
+
 
 try:  # Laulu mängimine igavesti
     while True:
@@ -9,7 +8,13 @@ try:  # Laulu mängimine igavesti
 except:
     pass
 
+def Game():
+    asd #siia tuleb gameluup. hetkel client nime all
 root = Tk()  # Akna tegemine
+
+root.title("MUD Chickantis")
+icon = PhotoImage(file='game icon.png')
+root.iconphoto(True, icon)
 
 # Scrollbar
 scrollbar = Scrollbar(root, bg="black", troughcolor="black", highlightbackground="black", highlightcolor="black")
@@ -73,7 +78,7 @@ new_data = ""
 
 # Enteri peale salvestatakse kirjutuskasti sisu ja tehakse see tühjaks
 def capture_enter(event):
-    global last_data, logo_art
+    global last_data, logo_art, root
     current_data = input_text.get("1.0", END).strip() # võtab kirjutatud lõigu
     
     
@@ -93,14 +98,11 @@ def capture_enter(event):
         if "help" in current_data:
             print("saadi kätte abikutse")
         if "host" in current_data:
-            subprocess.run(["python", "server.py" ])
-            
-            sys.exit()
+            #host funktion here
+            asd
         if "join" in current_data:
-            subprocess.run(["python", "client.py"])
-            
-            sys.exit()
-
+            #join funktion here
+            asd
     current_data = ""
 input_text.bind("<Return>", capture_enter)
 
