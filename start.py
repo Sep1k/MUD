@@ -2,6 +2,7 @@ import winsound
 from tkinter import *
 import socket
 import subprocess
+import re
 
 hostname = socket.gethostname()
 ip =  socket.gethostbyname(hostname)
@@ -15,11 +16,11 @@ except:
 
 gamestate = 0 #mainmenu
            #2 host menu
-           #3 join screen
-           #4 ready to game
+           #3 join enter ip
+           #4 join enter port
            
-def Game():
-    pass #siia tuleb gameluup. hetkel client nime all
+
+
 root = Tk()  # Akna tegemine
 
 root.title("MUD Chickantis")
@@ -87,43 +88,123 @@ last_data = ""
 new_data = ""
 joined_ip = ""
 joined_port = ""
+def is_valid_ip(ip_str):
+    # Regex pattern to match valid IPv4 addresses
+    pattern = r'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
+    return bool(re.match(pattern, ip_str))
 # Enteri peale salvestatakse kirjutuskasti sisu ja tehakse see tühjaks
 
 def capture_enter(event):
     global last_data, logo_art, root, ip, port, gamestate, joined_ip, joined_port
     print(gamestate)
     current_data = input_text.get("1.0", END).strip() # võtab kirjutatud lõigu
+    if gamestate == 5:
+        message = current_data
+    
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            client_socket.connect((joined_ip, joined_port))
+            client_socket.sendall(message.encode('utf-8'))
+            print("Sõnum saadetud!")
+
+            # Oodake serveri vastust
+            data = client_socket.recv(1024)  # Loe kuni 1024 baiti
+            if data:  # Kontrollime, et andmed pole tühjad
+                logo_art += "\n" + data.decode('utf-8')
+        
+                logo_text.config(state=NORMAL)  
+                logo_text.delete(1.0, END)
+                logo_text.insert(END, logo_art) 
+                logo_text.config(state=DISABLED)  
+
+                logo_text.see(END)
+                print(f"Vastus serverilt: {data.decode('utf-8')}")
+            
+        except Exception as e:
+            print(f"Tekkis viga: {e}")
+        finally:
+            client_socket.close()
+            input_text.delete("1.0", END)
     if gamestate == 4:
         joined_port == current_data
+        try:
+            if int(port) < 10000 and int(port) > 1000:
+
+                logo_text.config(state=NORMAL)
+                logo_text.delete("1.0", END) 
+                logo_art = (str("Joining Game\n IP = " + joined_ip + "\nEnter port you want to join:"))
+                logo_text.insert(END, logo_art)
+                logo_text.config(state=DISABLED)
+                logo_text.see(END)
+
+                gamestate = 5
+                logo_art.delete("1.0", END)
+                return
+            else:
+                logo_text.config(state=NORMAL)  
+                logo_text.delete(1.0, END)
+                logo_art += "\nPort is invalid. \nTry again."
+                logo_text.insert(END, logo_art) 
+                logo_text.config(state=DISABLED)
+                input_text.delete("1.0", END)
+                return
+        except:
+            logo_text.config(state=NORMAL)  
+            logo_text.delete(1.0, END)
+            logo_art += "\nPort is invalid. \nTry again."
+            logo_text.insert(END, logo_art) 
+            logo_text.config(state=DISABLED)
+            input_text.delete("1.0", END)
+            return
+        
         print(joined_port)
     if gamestate == 3:
-        joined_ip == current_data
-        logo_text.config(state=NORMAL)
-        logo_text.delete("1.0", END) 
-        logo_art = (str(joined_ip + "\nEnter port you want to join"))
-        logo_text.insert(END, logo_art)
-        logo_text.config(state=DISABLED)
-        logo_text.see(END)
-        gamestate = 4
+        joined_ip = current_data
+        try:
+            print('aaaa', joined_ip)
+            if is_valid_ip(joined_ip):
+                logo_text.config(state=NORMAL)
+                logo_text.delete("1.0", END) 
+                logo_art = (str("Joining Game\n IP = " + joined_ip + "\nEnter port you want to join:"))
+                logo_text.insert(END, logo_art)
+                logo_text.config(state=DISABLED)
+                logo_text.see(END)
+
+                gamestate = 4
+                
+                return
+
+            else:
+                logo_text.config(state=NORMAL)  
+                logo_text.delete(1.0, END)
+                logo_art += "\nIP is invalid. \nTry again."
+                logo_text.insert(END, logo_art) 
+                logo_text.config(state=DISABLED)
+                input_text.delete("1.0", END)
+                return
+        except:
+            logo_text.config(state=NORMAL)  
+            logo_text.delete(1.0, END)
+            logo_art += "\nIP is invalid. \nTry again."
+            logo_text.insert(END, logo_art) 
+            logo_text.config(state=DISABLED)
+            input_text.delete("1.0", END)
+            return
+        
     
     if gamestate == 2:
         port = current_data
         try:
             if int(port) < 10000 and int(port) > 1000:
-                print("port kontrollitud")
                 port = current_data
-                
-                print("kirjutan faili")
                 with open('filaes/kaluriped.txt', 'w') as file: 
                     pass #millegipärast kui fail kirjutamiseks avada ja sinna mitte midagi kirjutada kustutatakse selle sisu.
                 with open('filaes/kaluriped.txt', 'w') as file:
                     file.write(ip + "\n" + port)
-                print("avan uue programmi")
                 try:
                     subprocess.run(['python', 'filaes/server.py'])
                 except:
                     pass
-                print("programm avatud")
                 gamestate = 4
                 
 
@@ -176,6 +257,7 @@ def capture_enter(event):
             logo_text.insert(END, logo_art)
             logo_text.config(state=DISABLED)
             logo_text.see(END)
+            input_text.delete("1.0", END)
             gamestate = 2 
         if "join" in current_data:
             print("user tryed to join")
@@ -185,6 +267,7 @@ def capture_enter(event):
             logo_text.insert(END, logo_art)
             logo_text.config(state=DISABLED)
             logo_text.see(END)
+            input_text.delete("1.0", END)
             gamestate = 3
             
         else:
