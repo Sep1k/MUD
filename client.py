@@ -1,5 +1,5 @@
 import socket
-
+# suva
 SERVER_IP = '172.20.2.26'  # Muuda see serveri tegelikuks IP-aadressiks
 PORT = 12345
 
