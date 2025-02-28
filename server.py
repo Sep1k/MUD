@@ -1,7 +1,14 @@
 import socket
 
-HOST = '0.0.0.0'  # Kuulab kõiki võrguadaptereid
-PORT = 12345  # Port, mida kuulatakse
+
+
+hort = []
+with open('filaes/kaluriped.txt', 'r') as file: 
+    for rida in file:
+        hort.append(rida.strip())
+
+HOST = (hort[0])
+PORT = (hort[1])
 
 # Loo socket
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -36,3 +43,4 @@ while True:
         client_socket.sendall(vaste.encode('utf-8'))
 
     client_socket.close()
+
