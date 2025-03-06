@@ -170,21 +170,22 @@ def capture_enter(event):
             file.write(name)
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            client_socket.connect((ip, port))
+            client_socket.connect((ip, int(port)))
             client_socket.sendall(name.encode('utf-8'))
             data = client_socket.recv(1024)
             gamestate = 6
             if data:
                 print(f"Server alustas mängu .{data.decode('utf-8')}")
         except Exception as e:
-            print(f"Serveri alustamisega tekjkis viga")
+            print(f"Serveri alustamisega tekjkis viga !!!!")
+            print(e)
         finally:
             client_socket.close()
             
 
         logo_text.config(state=NORMAL)
         logo_text.delete("1.0", END) 
-        logo_art = (str("Ready to Game\n"  "Type help for help"))
+        logo_art = (str("Type start to start the game.\nBe shure that all players have joined."))
         logo_text.insert(END, logo_art)
         logo_text.config(state=DISABLED)
         logo_text.see(END)

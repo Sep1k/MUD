@@ -3,13 +3,18 @@ import socket
 print("Server proge alustas")
 
 hort = []
+print("Server: Serrveri pordi loop ")
 with open('filaes/kaluriped.txt', 'r') as file:
     for rida in file:
+        print(rida)
         hort.append(rida.strip())
+
 
 HOST = hort[0]
 PORT = int(hort[1])
 
+with open('fileas/mängijate nimekiri', 'w') as file:
+    print("Server: salvestan mängija nime")
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((HOST, PORT))
 server_socket.listen(5)
@@ -51,7 +56,7 @@ while True:
             client_socket.sendall("Server started".encode('utf-8'))
 
         else:
-            with open('fileas/nimekiri mängijatel', 'a') as file:
+            with open('fileas/mängijate nimekiri', 'a') as file:
                 print("Server: salvestan mängija nime")
                 file.write("\n" + data)
 
