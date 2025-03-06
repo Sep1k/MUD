@@ -47,10 +47,12 @@ while True:
 
         elif data == "siia käib rida, mis käivitab server.":
             gamestatus = 2
+            print("Server: alustan mängu")
             client_socket.sendall("Server started".encode('utf-8'))
 
         else:
             with open('fileas/nimekiri mängijatel', 'a') as file:
+                print("Server: salvestan mängija nime")
                 file.write("\n" + data)
 
     client_socket.close()

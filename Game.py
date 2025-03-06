@@ -43,7 +43,7 @@ logo_art = '''                      ||       ||                                 
     ||       _//                ||           ||                                        
    ||      _/%        _____    //            |!       @==--……________     _______………………---………………____
    ||___--__-----""""     ||  //            [|          |           ´´´´´´´  
-  /--""                    ||               [|          |   Multi User Dungeon                   
+  /--""                    ||               [|          |   Multi User Dungeon Chickantis                  
  "                          }]             {{            |                          
                            [|              ||_____ -     |                                 
                            ||       _      |/-   _"/    |   Type host or join to continue     
@@ -164,6 +164,10 @@ def capture_enter(event):
     if gamestate == 8:
         name = current_data
         name += ""
+        with open('filaes/kalurinimined.txt', 'w') as file: 
+            pass #millegipärast kui fail kirjutamiseks avada ja sinna mitte midagi kirjutada kustutatakse selle sisu.
+        with open('filaes/kalurinimined.txt', 'w') as file:
+            file.write(name)
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             client_socket.connect((ip, port))
@@ -277,26 +281,38 @@ def capture_enter(event):
     if gamestate == 2:
         port = current_data
         
-        if int(port) > 999 and int(port) < 100000:
-            port = current_data
-            with open('filaes/kaluriped.txt', 'w') as file: 
-                pass #millegipärast kui fail kirjutamiseks avada ja sinna mitte midagi kirjutada kustutatakse selle sisu.
-            with open('filaes/kaluriped.txt', 'w') as file:
-                file.write(ip + "\n" + port)
-            logo_text.config(state=NORMAL)
-            logo_text.delete("1.0", END) 
-            logo_art = (str("Enter user name"))
-            logo_text.insert(END, logo_art)
-            logo_text.config(state=DISABLED)
-            logo_text.see(END)
-            input_text.delete("1.0", END)
-            try:
-                subprocess.Popen(['python', 'filaes/server.py'])
-            except:
-                pass
-            gamestate = 8
+        try:
+            if int(port) == str:
+                port = port
+            if int(port) > 999 and int(port) < 100000 :
+                port = current_data
+                with open('filaes/kaluriped.txt', 'w') as file: 
+                    pass #millegipärast kui fail kirjutamiseks avada ja sinna mitte midagi kirjutada kustutatakse selle sisu.
+                with open('filaes/kaluriped.txt', 'w') as file:
+                    file.write(ip + "\n" + port)
+                logo_text.config(state=NORMAL)
+                logo_text.delete("1.0", END) 
+                logo_art = (str("Enter user name"))
+                logo_text.insert(END, logo_art)
+                logo_text.config(state=DISABLED)
+                logo_text.see(END)
+                input_text.delete("1.0", END)
+                try:
+                    subprocess.Popen(['python', 'filaes/server.py'])
+                except:
+                    pass
+                gamestate = 8
+            else:
+                print("siin")
+                logo_text.config(state=NORMAL)  
+                logo_text.delete(1.0, END)
+                logo_art += "\nPort is invalid. \nTry again."
+                logo_text.insert(END, logo_art) 
+                logo_text.config(state=DISABLED)
+                input_text.delete("1.0", END)
+                return
 
-        else:
+        except:
             print("siin")
             logo_text.config(state=NORMAL)  
             logo_text.delete(1.0, END)
