@@ -13,8 +13,9 @@ with open('filaes/kaluriped.txt', 'r') as file:
 HOST = hort[0]
 PORT = int(hort[1])
 
-with open('fileas/mängijate nimekiri', 'w') as file:
-    print("Server: salvestan mängija nime")
+with open('filaes/mängijate nimekiri', 'w') as file:
+    pass
+    print("Server: salvestan_mängija nime")
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((HOST, PORT))
 server_socket.listen(5)
@@ -40,11 +41,11 @@ while True:
     client_socket, addr = server_socket.accept()
     print(f"Ühendus: {addr}")
 
-    data = client_socket.recv(1024)
+    data = client_socket.recv(2048)
     if data:
         data = data.decode('utf-8').strip()
         
-        if gamestatus == 2:
+        if int(gamestatus) == 2:
             print(f"Sõnum: {data}")
             q = data
             response = Game_brain()
@@ -56,7 +57,7 @@ while True:
             client_socket.sendall("Server started".encode('utf-8'))
 
         else:
-            with open('fileas/mängijate nimekiri', 'a') as file:
+            with open('filaes/mängijate nimekiri', 'a') as file:
                 print("Server: salvestan mängija nime")
                 file.write("\n" + data)
 

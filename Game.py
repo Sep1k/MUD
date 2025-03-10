@@ -122,7 +122,10 @@ def capture_enter(event):
     
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
+
+            joined_port = int(joined_port)   
             client_socket.connect((joined_ip, joined_port))
+            
             client_socket.sendall(message.encode('utf-8'))
             print("Sõnum saadetud!")
 
@@ -147,19 +150,51 @@ def capture_enter(event):
 
     if gamestate == 7:
         if current_data == "start":
-            gamestate == 6
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            client_socket.connect((ip, port))
-            client_socket.sendall("siia käib rida, mis käivitab server.".encode('utf-8'))
-            data = client_socket.recv(1024)
             gamestate = 6
+
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        try:
+            # Ensure port is an integer
+            port = int(port)  # This line ensures that port is an integer
+            
+            print(f"Attempting to connect to {ip}:{port}")
+            client_socket.connect((ip, port))  # Connect to server
+            print(f"Connected to {ip}:{port}")
+
+            client_socket.sendall("siia käib rida, mis käivitab server.".encode('utf-8'))
+            print("Message sent to server.")
+
+            # Wait for response from the server
+            data = client_socket.recv(1024)
             if data:
-                print(f"Server alustas mängu .{data.decode('utf-8')}")
+                print(f"Received data from server: {data.decode('utf-8')}")  # Print server response
+
+            # Change gamestate after getting response
+            gamestate = 6
+            logo_text.config(state=NORMAL)
+            logo_text.delete("1.0", END)
+            logo_art = (str("Game has begun. Type help for help"))
+            logo_text.insert(END, logo_art)
+            logo_text.config(state=DISABLED)
+            logo_text.see(END)
+            input_text.delete("1.0", END)
+
         except Exception as e:
-            print(f"Serveri alustamisega tekjkis viga")
+            print(f"Error starting server: {e}")
+            logo_text.config(state=NORMAL)
+            logo_text.delete("1.0", END)
+            logo_art = (str("There was an error starting the server. \nType start again or fix the error."))
+            logo_text.insert(END, logo_art)
+            logo_text.config(state=DISABLED)
+            logo_text.see(END)
+            input_text.delete("1.0", END)
+
         finally:
             client_socket.close()
+
+
+
 
     if gamestate == 8:
         name = current_data
@@ -285,7 +320,7 @@ def capture_enter(event):
         try:
             if int(port) == str:
                 port = port
-            if int(port) > 999 and int(port) < 100000 :
+            if int(port) > 999 and int(port) < 10000 :
                 port = current_data
                 with open('filaes/kaluriped.txt', 'w') as file: 
                     pass #millegipärast kui fail kirjutamiseks avada ja sinna mitte midagi kirjutada kustutatakse selle sisu.
