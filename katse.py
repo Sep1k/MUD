@@ -2,18 +2,9 @@ import socket
 
 print("Server proge alustas")
 
-hort = []
-print("Server: Serrveri pordi loop ")
-with open('filaes/kaluriped.txt', 'r') as file:
-    for rida in file:
-        print(rida)
-        hort.append(rida.strip())
 
-
-HOST = hort[0]
-PORT = int(hort[1])
-print("port", PORT)
-
+HOST = "192.168.46.46"
+PORT = 1234
 
 
 with open('filaes/mängijate nimekiri', 'w') as file:
@@ -71,5 +62,5 @@ while True:
                 print("Server: salvestan mängija nime")
                 file.write(name2 + " 200" + "\n")
             client_socket.sendall("server sai nime kätte". encode('utf-8'))
-        
+
     client_socket.close()
