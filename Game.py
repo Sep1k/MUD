@@ -287,33 +287,53 @@ def capture_enter(event):
         name = current_data
         name += ""
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        file.w
-            
+        
+        try:
+            saadetis = f"nameisindata {name}"
+            print(saadetis)
+            client_socket.connect((joined_ip, int(joined_port)))
+            client_socket.sendall(saadetis.encode('utf-8'))
+            data = client_socket.recv(1024)
+            gamestate = 6
+            print("saavutasin ühenduse serveriga saates nime")
+            if data:
+                print(f"Server alustas mängu .{data.decode('utf-8')}")
+            logo_text.config(state=NORMAL)
+            logo_text.delete("1.0", END) 
+            logo_art = (str("Ready to Game\n"  "Type help for help"))
+            logo_text.insert(END, logo_art)
+            logo_text.config(state=DISABLED)
+            logo_text.see(END)
+            input_text.delete("1.0", END)
+            gamestate = 6
 
-        logo_text.config(state=NORMAL)
-        logo_text.delete("1.0", END) 
-        logo_art = (str("Ready to Game\n"  "Type help for help"))
-        logo_text.insert(END, logo_art)
-        logo_text.config(state=DISABLED)
-        logo_text.see(END)
-        input_text.delete("1.0", END)
-        gamestate = 6
+            #laiendada wait screenile
+
+        except Exception as e:
+            print(f"Serverile ei jõudnud nimi kohale")
+            print(e)
+        finally:
+            client_socket.close()
+            print("nimi serverile saadetud")
+               
+
+
 
 
     if gamestate == 4:
-        joined_port == current_data
+        
+        port2 = current_data
         try:
-            if int(port) < 10000 and int(port) > 1000:
-
+            if int(port2) > 999 and int(port2) < 10000:
+                joined_port = current_data
                 logo_text.config(state=NORMAL)
                 logo_text.delete("1.0", END) 
                 logo_art = (str("Enter name:"))
                 logo_text.insert(END, logo_art)
                 logo_text.config(state=DISABLED)
                 logo_text.see(END)
-
                 gamestate = 5
-                logo_art.delete("1.0", END)
+                input_text.delete("1.0", END)
                 return
             else:
                 logo_text.config(state=NORMAL)  
@@ -326,17 +346,17 @@ def capture_enter(event):
         except:
             logo_text.config(state=NORMAL)  
             logo_text.delete(1.0, END)
-            logo_art += "\nPort is invalid. \nTry again."
+            logo_art += "\nPort is invaliaaaaaaaad. \nTry again."
             logo_text.insert(END, logo_art) 
             logo_text.config(state=DISABLED)
             input_text.delete("1.0", END)
             return
-        
-        print(joined_port)
+
 
 
     if gamestate == 3:
         joined_ip = current_data
+        print("joined ip = ", joined_ip)
         try:
             print('aaaa', joined_ip)
             if is_valid_ip(joined_ip):
@@ -346,7 +366,7 @@ def capture_enter(event):
                 logo_text.insert(END, logo_art)
                 logo_text.config(state=DISABLED)
                 logo_text.see(END)
-
+                input_text.delete("1.0", END)
                 gamestate = 4
                 
                 return

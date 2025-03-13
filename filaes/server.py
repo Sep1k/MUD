@@ -13,6 +13,9 @@ with open('filaes/kaluriped.txt', 'r') as file:
 HOST = hort[0]
 PORT = int(hort[1])
 print("port", PORT)
+HOST = "192.168.46.46"
+PORT = 1234
+
 
 with open('filaes/mängijate nimekiri', 'w') as file:
     pass
@@ -46,7 +49,7 @@ while True:
     
     if data:
         data = data.decode('utf-8').strip()
-        
+        print("SERVER: ", data)
         print("gamestatus", gamestatus)
         if int(gamestatus) == 2:
             print("server: " + f"Sõnum: {data}")
@@ -59,9 +62,15 @@ while True:
             print("Server: alustan mängu")
             client_socket.sendall("Server started".encode('utf-8'))
 
-        else:
+        elif "nameisindata" in data:
+            print("SERVER: Kontrollin nime")
+            print(data)
+            name = data.split()
+            name2 = name[1]
+            print(name2)
             with open('filaes/mängijate nimekiri', 'a') as file:
                 print("Server: salvestan mängija nime")
-                file.write("\n" + data)
-
+                file.write(name2 + " 200" + "\n")
+            client_socket.sendall("server sai nime kätte". encode('utf-8'))
+        
     client_socket.close()
