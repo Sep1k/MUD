@@ -112,13 +112,6 @@ def check_port(port):
     finally:
         sock.close()
 
-def check_game_status():
-    client_socket.sendall("checkstatus".encode('utf-8'))
-    response = client_socket.recv(2048).decode('utf-8')
-    print(f"Server response: {response}")
-    return response
-
-
 
 
 
@@ -312,7 +305,7 @@ def capture_enter(event):
             logo_text.config(state=DISABLED)
             logo_text.see(END)
             input_text.delete("1.0", END)
-            gamestate = 9
+            gamestate = 6
 
             #laiendada wait screenile
 
@@ -323,11 +316,7 @@ def capture_enter(event):
             client_socket.close()
             print("nimi serverile saadetud")
                
-        if gamestate == 9:
-            while True:
-                if check_game_status() is "Game has started!":
-                    gamestate = 6
-                    break
+
 
 
 
