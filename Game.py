@@ -8,6 +8,7 @@ hostname = socket.gethostname()
 ip =  socket.gethostbyname(hostname)
 port = ""
 print(ip)
+
 #try:  # Laulu mängimine igavesti
 #    while True:
 #        winsound.PlaySound('filaes/Ambient.wav', winsound.SND_FILENAME)
@@ -95,6 +96,21 @@ def is_valid_ip(ip_str):
     return bool(re.match(pattern, ip_str))
 # Enteri peale salvestatakse kirjutuskasti sisu ja tehakse see tühjaks
 
+def check_port(port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(1)  # Optional: set a timeout of 1 second
+
+    try:
+        # Try to connect to the port to see if it's in use
+        sock.connect((ip, port))
+    except (socket.timeout, socket.error):
+        # If there's a timeout or error, the port is available
+        return True
+    else:
+        # If connection is successful, the port is in use
+        return False
+    finally:
+        sock.close()
 
 
 
@@ -116,21 +132,41 @@ def capture_enter(event):
     print(gamestate)
     current_data = input_text.get("1.0", END).strip() # võtab kirjutatud lõigu
    # current_data = str(current_data.lower)
+    current_data.lower
     print(current_data)
     if gamestate == 6: # main küsimine sealt serverilt (mängi ise)
+        print("gamestate 6", port)
+        print("joined_port: ", joined_port)
+        
+
+        current_data = input_text.get("1.0", END).strip()
+
+        if not current_data:
+            print("Error: Attempted to send an empty message.")
+            return  # If the message is empty, don't proceed
+
+        # Your existing code for constructing message
+
         message = current_data
-    
+        logo_art += str("\n" + str(current_data))
+        logo_text.config(state=NORMAL)  
+        logo_text.delete(1.0, END)
+        logo_text.insert(END, logo_art) 
+        logo_text.config(state=DISABLED)  
+        logo_text.see(END)
+
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-
-            joined_port = int(joined_port)   
-            client_socket.connect((joined_ip, joined_port))
+           
+            
+            client_socket.connect((joined_ip, int(joined_port)))
             
             client_socket.sendall(message.encode('utf-8'))
             print("Sõnum saadetud!")
 
             # Oodake serveri vastust
             data = client_socket.recv(1024)  # Loe kuni 1024 baiti
+            print("decoden ja kirjutan serveri saadetis")
             if data:  # Kontrollime, et andmed pole tühjad
                 logo_art += "\n" + data.decode('utf-8')
         
@@ -143,17 +179,30 @@ def capture_enter(event):
                 print(f"Vastus serverilt: {data.decode('utf-8')}")
             
         except Exception as e:
-            print(f"Tekkis viga: {e}")
+            print(f"is viga: {e}")
         finally:
             client_socket.close()
             input_text.delete("1.0", END)
 
     if gamestate == 7:
-        if current_data == "start":
+        if "start" in current_data:
             gamestate = 6
-
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+            
+            joined_ip = ip
+            joined_port = port
+            print(("joind port gs 7 "), joined_port)
+        
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        else:
+            logo_text.config(state=NORMAL)  
+            logo_text.delete(1.0, END)
+            logo_art += "\nPort is already taken. \nTry other port."
+            logo_text.insert(END, logo_art) 
+            logo_text.config(state=DISABLED)
+            input_text.delete("1.0", END)
+            print("start input wrong")
+            return
+        
         try:
             # Ensure port is an integer
             port = int(port)  # This line ensures that port is an integer
@@ -192,6 +241,7 @@ def capture_enter(event):
 
         finally:
             client_socket.close()
+            print(port)
 
 
 
@@ -199,6 +249,8 @@ def capture_enter(event):
     if gamestate == 8:
         name = current_data
         name += ""
+        print(name)
+        print(port)
         with open('filaes/kalurinimined.txt', 'w') as file: 
             pass #millegipärast kui fail kirjutamiseks avada ja sinna mitte midagi kirjutada kustutatakse selle sisu.
         with open('filaes/kalurinimined.txt', 'w') as file:
@@ -209,13 +261,16 @@ def capture_enter(event):
             client_socket.sendall(name.encode('utf-8'))
             data = client_socket.recv(1024)
             gamestate = 6
+            print("saavutasin ühenduse serveriga saates nime")
             if data:
                 print(f"Server alustas mängu .{data.decode('utf-8')}")
+
         except Exception as e:
-            print(f"Serveri alustamisega tekjkis viga !!!!")
+            print(f"Serverile ei jõudnud nimi kohale")
             print(e)
         finally:
             client_socket.close()
+            print("keegi ei tea mu nime ", port)
             
 
         logo_text.config(state=NORMAL)
@@ -315,29 +370,46 @@ def capture_enter(event):
         
 
     if gamestate == 2:
-        port = current_data
+        port2 = current_data
         
         try:
-            if int(port) == str:
-                port = port
-            if int(port) > 999 and int(port) < 10000 :
-                port = current_data
-                with open('filaes/kaluriped.txt', 'w') as file: 
-                    pass #millegipärast kui fail kirjutamiseks avada ja sinna mitte midagi kirjutada kustutatakse selle sisu.
-                with open('filaes/kaluriped.txt', 'w') as file:
-                    file.write(ip + "\n" + port)
-                logo_text.config(state=NORMAL)
-                logo_text.delete("1.0", END) 
-                logo_art = (str("Enter user name"))
-                logo_text.insert(END, logo_art)
-                logo_text.config(state=DISABLED)
-                logo_text.see(END)
-                input_text.delete("1.0", END)
-                try:
-                    subprocess.Popen(['python', 'filaes/server.py'])
-                except:
-                    pass
-                gamestate = 8
+            print("port", type(port2), port, int(port2)+1)
+            if int(port2) > 999 and int(port2) < 10000:
+                print("siia me ei jõua")
+                if check_port(int(port2)):
+                    print(f"Port {port2} is available.")
+                    print("port ei olnud võetud")
+                    
+                    port = current_data
+                    print("siin on port gs2", port)
+                    with open('filaes/kaluriped.txt', 'w') as file: 
+                        pass #millegipärast kui fail kirjutamiseks avada ja sinna mitte midagi kirjutada kustutatakse selle sisu.
+                    with open('filaes/kaluriped.txt', 'w') as file:
+                        file.write(ip + "\n" + port)
+                    logo_text.config(state=NORMAL)
+                    logo_text.delete("1.0", END) 
+                    logo_art = (str("Enter user name"))
+                    logo_text.insert(END, logo_art)
+                    logo_text.config(state=DISABLED)
+                    logo_text.see(END)
+                    input_text.delete("1.0", END)
+                    try:
+                        subprocess.Popen(['python', 'filaes/server.py'])
+                    except:
+                        pass
+                    gamestate = 8
+                    print(port)
+
+                else:
+                    print(f"Port {port} is already taken.")
+                    logo_text.config(state=NORMAL)  
+                    logo_text.delete(1.0, END)
+                    logo_art += "\nPort is already taken. \nTry other port."
+                    logo_text.insert(END, logo_art) 
+                    logo_text.config(state=DISABLED)
+                    input_text.delete("1.0", END)
+                    return
+
             else:
                 print("siin")
                 logo_text.config(state=NORMAL)  
@@ -349,7 +421,7 @@ def capture_enter(event):
                 return
 
         except:
-            print("siin")
+            print("siilike")
             logo_text.config(state=NORMAL)  
             logo_text.delete(1.0, END)
             logo_art += "\nPort is invalid. \nTry again."
@@ -388,7 +460,7 @@ def capture_enter(event):
                 
                 logo_text.config(state=NORMAL)
                 logo_text.delete("1.0", END) 
-                logo_art = (str("HOSTING GAME\n IP = " + ip + "\nType in port for game to host on(4 didget number):"))
+                logo_art = (str("HOSTING GAME\n IP = " + ip + "\nType in port for game to host on(4 didget number)(recomender: 9999):" ))
                 logo_text.insert(END, logo_art)
                 logo_text.config(state=DISABLED)
                 logo_text.see(END)

@@ -12,6 +12,7 @@ with open('filaes/kaluriped.txt', 'r') as file:
 
 HOST = hort[0]
 PORT = int(hort[1])
+print("port", PORT)
 
 with open('filaes/mängijate nimekiri', 'w') as file:
     pass
@@ -26,12 +27,12 @@ q = "hello"
 Mkorrad = 0
 gamestatus = 0
 
-def Game_brain():
+def Game_brain(data):
     global q, Mkorrad
-    q = q.lower()
-    if q in ["tere", "hi", "hello", "you"]:
+    data = data.lower()
+    if data in ["tere", "hi", "hello", "you"]:
         return "Tere"
-    elif q == "map":
+    elif data == "map":
         Mkorrad += 1
         return f"Mappi on vaadatud {Mkorrad}"
     else:
@@ -40,15 +41,17 @@ def Game_brain():
 while True:
     client_socket, addr = server_socket.accept()
     print(f"Ühendus: {addr}")
-
+    print("server: serverühendus edukalt")
     data = client_socket.recv(2048)
+    
     if data:
         data = data.decode('utf-8').strip()
         
+        print("gamestatus", gamestatus)
         if int(gamestatus) == 2:
-            print(f"Sõnum: {data}")
-            q = data
-            response = Game_brain()
+            print("server: " + f"Sõnum: {data}")
+
+            response = Game_brain(data)
             client_socket.sendall(response.encode('utf-8'))
 
         elif data == "siia käib rida, mis käivitab server.":
