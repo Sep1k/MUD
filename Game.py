@@ -3,6 +3,7 @@ from tkinter import *
 import socket
 import subprocess
 import re
+import time
 
 hostname = socket.gethostname()
 ip =  socket.gethostbyname(hostname)
@@ -196,7 +197,7 @@ def capture_enter(event):
         else:
             logo_text.config(state=NORMAL)  
             logo_text.delete(1.0, END)
-            logo_art += "\nPort is already taken. \nTry other port."
+            logo_art += "Start is not writen like that."
             logo_text.insert(END, logo_art) 
             logo_text.config(state=DISABLED)
             input_text.delete("1.0", END)
@@ -245,7 +246,6 @@ def capture_enter(event):
 
 
 
-
     if gamestate == 8:
         name = current_data
         name += ""
@@ -265,22 +265,25 @@ def capture_enter(event):
             if data:
                 print(f"Server alustas mängu .{data.decode('utf-8')}")
 
+            logo_text.config(state=NORMAL)
+            logo_text.delete("1.0", END) 
+            logo_art = (str("Type start to start the game.\nBe shure that all players have joined."))
+            logo_text.insert(END, logo_art)
+            logo_text.config(state=DISABLED)
+            logo_text.see(END)
+            input_text.delete("1.0", END)
+            gamestate = 7
+
         except Exception as e:
             print(f"Serverile ei jõudnud nimi kohale")
             print(e)
+
         finally:
             client_socket.close()
             print("keegi ei tea mu nime ", port)
             
 
-        logo_text.config(state=NORMAL)
-        logo_text.delete("1.0", END) 
-        logo_art = (str("Type start to start the game.\nBe shure that all players have joined."))
-        logo_text.insert(END, logo_art)
-        logo_text.config(state=DISABLED)
-        logo_text.see(END)
-        input_text.delete("1.0", END)
-        gamestate = 7
+        
 
 
     if gamestate == 5: # nime panemine mängijale.
@@ -295,27 +298,63 @@ def capture_enter(event):
             client_socket.sendall(saadetis.encode('utf-8'))
             data = client_socket.recv(1024)
             gamestate = 6
+           # client_socket.close()
+            print(data)
             print("saavutasin ühenduse serveriga saates nime")
             if data:
                 print(f"Server alustas mängu .{data.decode('utf-8')}")
-            logo_text.config(state=NORMAL)
-            logo_text.delete("1.0", END) 
-            logo_art = (str("Ready to Game\n"  "Type help for help"))
-            logo_text.insert(END, logo_art)
-            logo_text.config(state=DISABLED)
-            logo_text.see(END)
-            input_text.delete("1.0", END)
-            gamestate = 6
+                
+                logo_text.config(state=NORMAL)
+                logo_text.delete("1.0", END)
+                logo_art = (str("Waiting for game to start"))
+                logo_text.insert(END, logo_art)
+                logo_text.config(state=DISABLED)
+                logo_text.see(END)
+                input_text.delete("1.0", END)
+            
+            while True:
 
-            #laiendada wait screenile
+                print("ootan")
+                try:
+                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    client_socket.connect((joined_ip, int(joined_port)))
+                    client_socket.sendall("Kas mäng on alanud liitunud????".encode('utf-8'))
+                    data = client_socket.recv(4096)
+                    
+                    print("küsin")
+                    print(data)
+                    if data: #.decode('utf-8') == "Mäng on alanud!!!!!":
+                        logo_text.config(state=NORMAL)
+                        logo_text.delete("1.0", END)
+                        logo_art = (str("Game has started. type help for help! Go win!!! "))
+                        logo_text.insert(END, logo_art)
+                        logo_text.config(state=DISABLED)
+                        logo_text.see(END)
+                        input_text.delete("1.0", END)
+                        break
+                    time.sleep(1)
+                except:
+                    print("tekkis viga gamestate 9")
+             #   finally:
+             #       client_socket.close()
+        
+            gamestate = 6
+            client_socket.close()
+                
 
         except Exception as e:
             print(f"Serverile ei jõudnud nimi kohale")
             print(e)
+            logo_text.config(state=NORMAL)  
+            logo_text.delete(1.0, END)
+            logo_art += "\nsomething went wrong. Resart program."
+            logo_text.insert(END, logo_art) 
+            logo_text.config(state=DISABLED)
+            input_text.delete("1.0", END)
         finally:
             client_socket.close()
             print("nimi serverile saadetud")
-               
+
 
 
 
@@ -346,7 +385,7 @@ def capture_enter(event):
         except:
             logo_text.config(state=NORMAL)  
             logo_text.delete(1.0, END)
-            logo_art += "\nPort is invaliaaaaaaaad. \nTry again."
+            logo_art += "\nPort is invalid. \nTry again."
             logo_text.insert(END, logo_art) 
             logo_text.config(state=DISABLED)
             input_text.delete("1.0", END)
@@ -500,5 +539,7 @@ def capture_enter(event):
             else:
                 input_text.delete("1.0", END)
 input_text.bind("<Return>", capture_enter)
+
+
 
 mainloop()

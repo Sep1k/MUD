@@ -28,7 +28,7 @@ print(f"Server kuulab {HOST}:{PORT}")
 q = "hello"
 Mkorrad = 0
 gamestatus = 0
-
+alustatud = 0
 def Game_brain(data):
     global q, Mkorrad
     data = data.lower()
@@ -58,6 +58,7 @@ while True:
 
         elif data == "siia käib rida, mis käivitab server.":
             gamestatus = 2
+            alustatud = 1
             print("Server: alustan mängu")
             client_socket.sendall("Server started".encode('utf-8'))
 
@@ -67,9 +68,13 @@ while True:
             name = data.split()
             name2 = name[1]
             print(name2)
+            player_location = "põld"
             with open('filaes/mängijate nimekiri', 'a') as file:
                 print("Server: salvestan mängija nime")
-                file.write(name2 + " 200" + "\n")
-            client_socket.sendall("server sai nime kätte". encode('utf-8'))
-        
+                file.write(str(name2) + str(player_location) + " 200 " +  "\n" )
+            client_socket.sendall("server sai nime kätte".encode('utf-8'))
+        if data == "Kas mäng on alanud liitunud????":
+            if alustatud == 1:
+                print("SERVER: saatsin kinnituse")
+                client_socket.sendall("Mäng on alanud!!!!!".encode('utf-8'))
     client_socket.close()
