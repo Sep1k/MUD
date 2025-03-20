@@ -83,7 +83,7 @@ while True:
                     with open('filaes/mängijate nimekiri', 'r') as file: 
                         print("Server: Kontrollin mängija nime")
                         if name2 in file:
-                            client_socket.sendall("nimi ei ole saadaval!!!!".encode('utf-8'))
+                            client_socket.sendall("nimi ei ole saadaval".encode('utf-8'))
                             print("SERVER: nimi ei ole saadaval")
                             continue 
                         else:
@@ -98,7 +98,7 @@ while True:
                         client_socket.sendall("nimi on saadaval".encode('utf-8'))
                 with open('filaes/mängijate nimekiri', 'w') as file:
                     file.write(str(name2) + " 200 " +  "\n" )
-            client_socket.sendall("server sai nime kätte".encode('utf-8'))
+            client_socket.sendall("server sai nime katte".encode('utf-8'))
         if data == "Kas mäng on alanud liitunud????":
             if alustatud == 1:
                 print("SERVER: saatsin kinnituse")

@@ -317,7 +317,7 @@ def capture_enter(event):
             print("saavutasin ühenduse serveriga saates nime")
             data = data.decode('utf-8')
             print(data)
-            if data == "server sai nime kätte":
+            if data == "nimi on saadaval":
                 print(f"Server alustas mängu .{data.decode('utf-8')}")
                 
                 logo_text.config(state=NORMAL)
@@ -327,7 +327,7 @@ def capture_enter(event):
                 logo_text.config(state=DISABLED)
                 logo_text.see(END)
                 input_text.delete("1.0", END)
-            elif data == "nimi ei ole saadaval!!!!":
+            elif data == "nimi ei ole saadaval":
                 logo_text.config(state=NORMAL)
                 logo_text.delete("1.0", END)
                 logo_art += (str("\ninvalid name. Try again"))
@@ -336,8 +336,10 @@ def capture_enter(event):
                 logo_text.see(END)
                 input_text.delete("1.0", END)
                 return
-            elif data == "nimi ei ole saadaval!!!!":
-                return
+            else:
+                print("else osa", data)
+                print(data)
+                print("eelm rida oli data ka")
             while True:
 
                 print("ootan")
