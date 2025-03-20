@@ -142,6 +142,7 @@ def capture_enter(event):
 
         current_data = input_text.get("1.0", END).strip()
 
+
         if not current_data:
             print("Error: Attempted to send an empty message.")
             return  # If the message is empty, don't proceed
@@ -156,6 +157,19 @@ def capture_enter(event):
         logo_text.config(state=DISABLED)  
         logo_text.see(END)
 
+        if current_data == "help":
+
+            logo_art += str("\n" + str(current_data))
+            logo_art += "\nCOMMANDS\nmovment\n    go <place>\n    look\n    map\n    touch <itam>\n    scan\nattack\n    shoot <target>\n    weapon\n"
+            
+            logo_text.config(state=NORMAL)  
+            logo_text.delete(1.0, END)
+            logo_text.insert(END, logo_art) 
+            logo_text.config(state=DISABLED)  
+            logo_text.see(END)
+            
+            
+            return
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
            
@@ -301,7 +315,9 @@ def capture_enter(event):
            # client_socket.close()
             print(data)
             print("saavutasin ühenduse serveriga saates nime")
-            if data:
+            data = data.decode('utf-8')
+            print(data)
+            if data == "server sai nime kätte":
                 print(f"Server alustas mängu .{data.decode('utf-8')}")
                 
                 logo_text.config(state=NORMAL)
@@ -311,7 +327,17 @@ def capture_enter(event):
                 logo_text.config(state=DISABLED)
                 logo_text.see(END)
                 input_text.delete("1.0", END)
-            
+            elif data == "nimi ei ole saadaval!!!!":
+                logo_text.config(state=NORMAL)
+                logo_text.delete("1.0", END)
+                logo_art += (str("\ninvalid name. Try again"))
+                logo_text.insert(END, logo_art)
+                logo_text.config(state=DISABLED)
+                logo_text.see(END)
+                input_text.delete("1.0", END)
+                return
+            elif data == "nimi ei ole saadaval!!!!":
+                return
             while True:
 
                 print("ootan")

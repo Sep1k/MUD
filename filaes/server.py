@@ -1,4 +1,5 @@
 import socket
+import random 
 
 print("Server proge alustas")
 
@@ -13,6 +14,7 @@ with open('filaes/kaluriped.txt', 'r') as file:
 HOST = hort[0]
 PORT = int(hort[1])
 print("port", PORT)
+
 
 
 
@@ -37,6 +39,10 @@ def Game_brain(data):
     elif data == "map":
         Mkorrad += 1
         return f"Mappi on vaadatud {Mkorrad}"
+    elif data == "name":
+        with open('filaes/mängijate nimekiri','r') as file3:
+            
+            return file3
     else:
         return "Vigane command"
 
@@ -68,10 +74,30 @@ while True:
             name = data.split()
             name2 = name[1]
             print(name2)
-            player_location = "põld"
+
+            
+            player_location = "pold"
             with open('filaes/mängijate nimekiri', 'a') as file:
                 print("Server: salvestan mängija nime")
-                file.write(str(name2) + str(player_location) + " 200 " +  "\n" )
+                try:
+                    with open('filaes/mängijate nimekiri', 'r') as file: 
+                        print("Server: Kontrollin mängija nime")
+                        if name2 in file:
+                            client_socket.sendall("nimi ei ole saadaval!!!!".encode('utf-8'))
+                            print("SERVER: nimi ei ole saadaval")
+                            continue 
+                        else:
+                            with open('filaes/mängijate nimekiri', 'a') as append_file: 
+                                append_file.write(name2 + '\n') 
+                                print("Server: salvestan mängija nime")
+                                client_socket.sendall("nimi on saadaval".encode('utf-8'))
+                except FileNotFoundError:
+                    with open('filaes/mängijate nimekiri', 'a') as append_file:
+                        append_file.write(name2 + '\n') 
+                        print("Server: salvestan mängija nime")
+                        client_socket.sendall("nimi on saadaval".encode('utf-8'))
+                with open('filaes/mängijate nimekiri', 'w') as file:
+                    file.write(str(name2) + " 200 " +  "\n" )
             client_socket.sendall("server sai nime kätte".encode('utf-8'))
         if data == "Kas mäng on alanud liitunud????":
             if alustatud == 1:

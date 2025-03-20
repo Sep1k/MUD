@@ -24,5 +24,5 @@ while True:
     except Exception as e:
         print(f"Tekkis viga: {e}")
     finally:
-        client_socket.close()
+        client_socket.close()asds
 
