@@ -16,7 +16,49 @@ PORT = int(hort[1])
 print("port", PORT)
 
 
-
+mapik = random.randint(1,3)
+print(mapik)
+map = "map"
+if mapik == 1:
+    map = '''                                  _______Veski                      
+                                              /                        
+                                             /                         
+                                 ____       |                          
+                      ___Tiik___/    \__   /                           
+                   __/     \__          Põld         Kirik ___         
+                  /           \_      _/    \           |     \__Kelder
+              Saun              \    /       |           \             
+              |            _______Aas _       \           |            
+       Leiliruum       __/      /   |  \_      |          |            
+                   Laut        /    |    \__   \    __Surnuaed         
+                              |      \       Mets__/                   
+                             /        |                                
+                        __Maja        Koobas                           
+            Pööning____/                                               
+'''
+elif mapik == 2:
+    map = '''                            _____Päästekapsel2   
+                                  /                     
+                                 /    Päästekapsel1     
+                                 |   /                  
+                         _____   |__/                   
+                        /     \_|   |                   
+                  Jõusaal       |   |    söökla         
+                                |   |___/   \           
+                                | K |        \          
+                  Magala4_______| O |         \         
+                                | R |____     |         
+                                | I |    \___Köök       
+                  Magala3_______| D |                   
+                                | O |____Haigla         
+                                | R |                   
+                  Magala2_______|   |     ___Mootoriruum
+                                |   |____/         /    
+                                |___|             /     
+                  Magala1_______/   \            /      
+                                     \          /       
+                                      \__Juhtruum             '''
+    
 
 with open('filaes/mängijate nimekiri', 'w') as file:
     pass
@@ -75,7 +117,7 @@ while True:
             name2 = name[1]
             print(name2)
 
-            
+
             player_location = "pold"
             with open('filaes/mängijate nimekiri', 'a') as file:
                 print("Server: salvestan mängija nime")
@@ -94,7 +136,6 @@ while True:
                 except FileNotFoundError:
                     with open('filaes/mängijate nimekiri', 'a') as append_file:
                         append_file.write(name2 + '\n') 
-                        print("Server: salvestan mängija nime")
                         client_socket.sendall("nimi on saadaval".encode('utf-8'))
                 with open('filaes/mängijate nimekiri', 'w') as file:
                     file.write(str(name2) + " 200 " +  "\n" )

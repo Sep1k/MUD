@@ -113,7 +113,34 @@ def check_port(port):
     finally:
         sock.close()
 
+def check_server():
+    if gamestate == 6:
 
+        #viga peitub selle tsükli igaveses jooksmises. tuleb lisada mingi lõpetamise tingimus. ja server saadab kindal stri olenevalt, kas mängija saab liituda.
+        try:
+            # Siin saad panna oma socketi ühenduse ja vastuvõtu koodi
+            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            client_socket.settimeout(2)  # Lisame timeout, et vältida lõpmatut ooteaega
+            client_socket.connect((joined_ip, int(joined_port)))  # Muuda IP ja port vastavalt
+            client_socket.sendall("Kas mäng on alanud liitunud????".encode('utf-8'))
+            data = client_socket.recv(4096)
+            
+            if data:
+                logo_text.config(state=NORMAL)
+                logo_text.delete("1.0", END)
+                logo_art = "Game has started. type help for help! Go win!!!"
+                logo_text.insert(END, logo_art)
+                logo_text.config(state=DISABLED)
+                logo_text.see(END)
+                input_text.delete("1.0", END)
+            else:
+                # Kui serverilt ei saadud vastust, proovime uuesti
+                print("Ei saanud vastust serverilt, proovime uuesti...")
+        except Exception as e:
+            print(f"Tekkis viga: {e}")
+
+        # Kutsume 'check_server' funktsiooni uuesti 1 sekundi pärast
+        root.after(1000, check_server)
 
 
 
@@ -312,22 +339,35 @@ def capture_enter(event):
             client_socket.sendall(saadetis.encode('utf-8'))
             data = client_socket.recv(1024)
             gamestate = 6
-           # client_socket.close()
+            # client_socket.close()
             print(data)
             print("saavutasin ühenduse serveriga saates nime")
-            data = data.decode('utf-8')
-            print(data)
-            if data == "nimi on saadaval":
-                print(f"Server alustas mängu .{data.decode('utf-8')}")
+         
+            
+            if data == b"nimi on saadaval":
+
+                print(f"Server alustas mängu {data.decode('utf-8')}")
                 
-                logo_text.config(state=NORMAL)
-                logo_text.delete("1.0", END)
-                logo_art = (str("Waiting for game to start"))
-                logo_text.insert(END, logo_art)
-                logo_text.config(state=DISABLED)
-                logo_text.see(END)
-                input_text.delete("1.0", END)
+                try:
+                    logo_text.config(state=NORMAL)
+                    logo_text.delete("1.0", END)
+                    logo_art = (str("Waiting for game to start"))
+                    logo_text.insert(END, logo_art)
+                    logo_text.config(state=DISABLED)
+                    logo_text.see(END)
+                    input_text.delete("1.0", END)
+                    # Use after() to simulate a delay before continuing with the next step
+                    def delayed_disable():
+                        try:
+                            logo_text.config(state=Tk.DISABLED)
+                        except:
+                            pass
+                    # Schedule delayed_disable() to be called after 3 seconds (3000ms)
+                    root.after(3000, delayed_disable)
+                except:
+                    print("tekib viga gamestate 5")
             elif data == "nimi ei ole saadaval":
+                print("L]hkusin end ära siin ")
                 logo_text.config(state=NORMAL)
                 logo_text.delete("1.0", END)
                 logo_art += (str("\ninvalid name. Try again"))
@@ -340,34 +380,9 @@ def capture_enter(event):
                 print("else osa", data)
                 print(data)
                 print("eelm rida oli data ka")
-            while True:
-
-                print("ootan")
-                try:
-                    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    client_socket.connect((joined_ip, int(joined_port)))
-                    client_socket.sendall("Kas mäng on alanud liitunud????".encode('utf-8'))
-                    data = client_socket.recv(4096)
-                    
-                    print("küsin")
-                    print(data)
-                    if data: #.decode('utf-8') == "Mäng on alanud!!!!!":
-                        logo_text.config(state=NORMAL)
-                        logo_text.delete("1.0", END)
-                        logo_art = (str("Game has started. type help for help! Go win!!! "))
-                        logo_text.insert(END, logo_art)
-                        logo_text.config(state=DISABLED)
-                        logo_text.see(END)
-                        input_text.delete("1.0", END)
-                        break
-                    time.sleep(1)
-                except:
-                    print("tekkis viga gamestate 9")
-             #   finally:
-             #       client_socket.close()
-        
-            gamestate = 6
-            client_socket.close()
+            print("jõudsin siia")
+            
+            check_server()
                 
 
         except Exception as e:
