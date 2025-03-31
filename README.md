@@ -1,1 +1,3 @@
 # MUD
+
+run Game.py

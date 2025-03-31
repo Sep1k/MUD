@@ -195,7 +195,13 @@ def capture_enter(event):
     global last_data, logo_art, root, ip, port, gamestate, joined_ip, joined_port, data
     print(gamestate)
     current_data = input_text.get("1.0", END).strip() # võtab kirjutatud lõigu
-   # current_data = str(current_data.lower)
+   #import random
+
+
+    number = random.randint(1, 5)  # Generate a random number between 1 and 5
+    pop_sound = str("files/sounter/" + "pop" + str(number))  # Convert the number to a string
+    winsound.PlaySound(pop_sound, winsound.SND_FILENAME)
+    current_data = str(current_data.lower)
     current_data.lower
     print(current_data)
     if gamestate == 6: # main küsimine sealt serverilt (mängi ise)
