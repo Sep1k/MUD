@@ -9,7 +9,7 @@ hostname = socket.gethostname()
 ip =  socket.gethostbyname(hostname)
 port = ""
 print(ip)
-
+data = "ase"
 #try:  # Laulu mängimine igavesti
 #    while True:
 #        winsound.PlaySound('filaes/Ambient.wav', winsound.SND_FILENAME)
@@ -114,8 +114,11 @@ def check_port(port):
         sock.close()
 
 def check_server():
+    print("check_server")
+    global gamestate, data
     if gamestate == 6:
-
+        return
+    else:
         #viga peitub selle tsükli igaveses jooksmises. tuleb lisada mingi lõpetamise tingimus. ja server saadab kindal stri olenevalt, kas mängija saab liituda.
         try:
             # Siin saad panna oma socketi ühenduse ja vastuvõtu koodi
@@ -141,8 +144,41 @@ def check_server():
 
         # Kutsume 'check_server' funktsiooni uuesti 1 sekundi pärast
         root.after(1000, check_server)
-
-
+def nime_panemine_c():
+    global gamestate, data
+    if data == b"nimi on saadaval":
+        gamestate = 6
+        print(f"Server alustas mängu {data.decode('utf-8')}")
+        
+        try:
+            logo_text.config(state=NORMAL)
+            logo_text.delete("1.0", END)
+            logo_art = (str("Waiting for game to start"))
+            logo_text.insert(END, logo_art)
+            logo_text.config(state=DISABLED)
+            logo_text.see(END)
+            input_text.delete("1.0", END)
+            # Use after() to simulate a delay before continuing with the next step
+            def delayed_disable():
+                try:
+                    logo_text.config(state=Tk.DISABLED)
+                except:
+                    pass
+            # Schedule delayed_disable() to be called after 3 seconds (3000ms)
+            root.after(3000, delayed_disable)
+        except:
+            print("tekib viga gamestate 5")
+    elif data == "nimi ei ole saadaval":
+        print("L]hkusin end ära siin ")
+        logo_text.config(state=NORMAL)
+        logo_text.delete("1.0", END)
+        logo_art += (str("\ninvalid name. Try again"))
+        logo_text.insert(END, logo_art)
+        logo_text.config(state=DISABLED)
+        logo_text.see(END)
+        input_text.delete("1.0", END)
+        nime_panemine_c()
+        return
 
 
 
@@ -156,7 +192,7 @@ def check_server():
 
 
 def capture_enter(event):
-    global last_data, logo_art, root, ip, port, gamestate, joined_ip, joined_port
+    global last_data, logo_art, root, ip, port, gamestate, joined_ip, joined_port, data
     print(gamestate)
     current_data = input_text.get("1.0", END).strip() # võtab kirjutatud lõigu
    # current_data = str(current_data.lower)
@@ -338,49 +374,14 @@ def capture_enter(event):
             client_socket.connect((joined_ip, int(joined_port)))
             client_socket.sendall(saadetis.encode('utf-8'))
             data = client_socket.recv(1024)
-            gamestate = 6
+            
             # client_socket.close()
             print(data)
             print("saavutasin ühenduse serveriga saates nime")
          
             
-            if data == b"nimi on saadaval":
-
-                print(f"Server alustas mängu {data.decode('utf-8')}")
-                
-                try:
-                    logo_text.config(state=NORMAL)
-                    logo_text.delete("1.0", END)
-                    logo_art = (str("Waiting for game to start"))
-                    logo_text.insert(END, logo_art)
-                    logo_text.config(state=DISABLED)
-                    logo_text.see(END)
-                    input_text.delete("1.0", END)
-                    # Use after() to simulate a delay before continuing with the next step
-                    def delayed_disable():
-                        try:
-                            logo_text.config(state=Tk.DISABLED)
-                        except:
-                            pass
-                    # Schedule delayed_disable() to be called after 3 seconds (3000ms)
-                    root.after(3000, delayed_disable)
-                except:
-                    print("tekib viga gamestate 5")
-            elif data == "nimi ei ole saadaval":
-                print("L]hkusin end ära siin ")
-                logo_text.config(state=NORMAL)
-                logo_text.delete("1.0", END)
-                logo_art += (str("\ninvalid name. Try again"))
-                logo_text.insert(END, logo_art)
-                logo_text.config(state=DISABLED)
-                logo_text.see(END)
-                input_text.delete("1.0", END)
-                return
-            else:
-                print("else osa", data)
-                print(data)
-                print("eelm rida oli data ka")
-            print("jõudsin siia")
+            
+            nime_panemine_c()
             
             check_server()
                 
