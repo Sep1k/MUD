@@ -3,6 +3,7 @@ from tkinter import *
 import socket
 import subprocess
 import re
+import random
 import time
 
 hostname = socket.gethostname()
@@ -197,11 +198,13 @@ def capture_enter(event):
     current_data = input_text.get("1.0", END).strip() # võtab kirjutatud lõigu
    #import random
 
-
-    number = random.randint(1, 5)  # Generate a random number between 1 and 5
-    pop_sound = str("files/sounter/" + "pop" + str(number))  # Convert the number to a string
-    winsound.PlaySound(pop_sound, winsound.SND_FILENAME)
-    current_data = str(current_data.lower)
+    try:
+        number = random.randint(1, 5)  # Generate a random number between 1 and 5
+        pop_sound = str("filaes/sounter/" + "pop" + str(number) + ".wav")  # Convert the number to a string
+        winsound.PlaySound(pop_sound, winsound.SND_FILENAME)
+    except:
+        pass    
+    current_data = current_data.lower()
     current_data.lower
     print(current_data)
     if gamestate == 6: # main küsimine sealt serverilt (mängi ise)
