@@ -5,17 +5,24 @@ import subprocess
 import re
 import random
 import time
+import threading
 
 hostname = socket.gethostname()
 ip =  socket.gethostbyname(hostname)
 port = ""
 print(ip)
 data = "ase"
-#try:  # Laulu mängimine igavesti
-#    while True:
-#        winsound.PlaySound('filaes/Ambient.wav', winsound.SND_FILENAME)
-#except:
-#    pass
+
+def play_music(stop_event): #play music with threading
+    while not stop_event.is_set():
+        winsound.PlaySound('filaes/sounter/ambient.wav', winsound.SND_FILENAME)
+        time.sleep(100)  
+
+stop_event = threading.Event()
+
+music_thread = threading.Thread(target=play_music, args=(stop_event,))
+music_thread.daemon = True  
+music_thread.start()
 
 gamestate = 0 #mainmenu
            #2 host menu
@@ -170,7 +177,7 @@ def nime_panemine_c():
         except:
             print("tekib viga gamestate 5")
     elif data == "nimi ei ole saadaval":
-        print("L]hkusin end ära siin ")
+        print("Lühkusin end ära siin ")
         logo_text.config(state=NORMAL)
         logo_text.delete("1.0", END)
         logo_art += (str("\ninvalid name. Try again"))
@@ -196,12 +203,13 @@ def capture_enter(event):
     global last_data, logo_art, root, ip, port, gamestate, joined_ip, joined_port, data
     print(gamestate)
     current_data = input_text.get("1.0", END).strip() # võtab kirjutatud lõigu
-   #import random
+   
 
     try:
-        number = random.randint(1, 5)  # Generate a random number between 1 and 5
+        number = random.randint(3, 4)  # 1 ja 5 on väga kehvasti kuulda. 2 on kehvasti kuulda
         pop_sound = str("filaes/sounter/" + "pop" + str(number) + ".wav")  # Convert the number to a string
         winsound.PlaySound(pop_sound, winsound.SND_FILENAME)
+        print(pop_sound)
     except:
         pass    
     current_data = current_data.lower()
