@@ -13,22 +13,39 @@ port = ""
 print(ip)
 data = "ase"
 
-def play_music(stop_event): #play music with threading
-    while not stop_event.is_set():
-        winsound.PlaySound('filaes/sounter/ambient.wav', winsound.SND_FILENAME)
-        time.sleep(100)  
+def play_music_looped(stop_event):
+    sound_file = 'filaes/sounter/ambient.wav'
+    if not os.path.exists(sound_file):
+        print(f"Error: Sound file not found at {os.path.abspath(sound_file)}")
+        return
 
-stop_event = threading.Event()
+    print(f"Starting looped background music: {os.path.abspath(sound_file)}")
+    try:
+        # Play asynchronously and loop
+        winsound.PlaySound(sound_file, winsound.SND_FILENAME | winsound.SND_ASYNC | winsound.SND_LOOP | winsound.SND_NODEFAULT)
 
-music_thread = threading.Thread(target=play_music, args=(stop_event,))
-music_thread.daemon = True  
-music_thread.start()
+        # Keep the thread alive while the stop event isn't set
+        stop_event.wait() # This will block until stop_event.set() is called
 
-gamestate = 0 #mainmenu
-           #2 host menu
-           #3 join enter ip
-           #4 join enter port
-           
+        # Stop the sound when the event is set
+        print("Stopping background music.")
+        winsound.PlaySound(None, winsound.SND_PURGE)
+
+    except Exception as e:
+        print(f"Error starting/playing looped sound: {e}")
+
+#def play_music(stop_event): #play music with threading
+#   while not stop_event.is_set():
+#       winsound.PlaySound('filaes/sounter/ambient.wav', winsound.SND_FILENAME)
+#       time.sleep(100)  
+
+#stop_event = threading.Event()
+
+#music_thread = threading.Thread(target=play_music, args=(stop_event,))
+#usic_thread.daemon = True  
+#music_thread.start()
+
+gamestate = 0 
 
 
 root = Tk()  # Akna tegemine
@@ -199,6 +216,13 @@ def nime_panemine_c():
 
 
 
+
+
+
+
+
+
+
 def capture_enter(event):
     global last_data, logo_art, root, ip, port, gamestate, joined_ip, joined_port, data
     print(gamestate)
@@ -211,11 +235,12 @@ def capture_enter(event):
         winsound.PlaySound(pop_sound, winsound.SND_FILENAME)
         print(pop_sound)
     except:
+        print(f"Error related to pop sound (even if commented out): {e}")
         pass    
     current_data = current_data.lower()
     current_data.lower
     print(current_data)
-    if gamestate == 6: # main küsimine sealt serverilt (mängi ise)
+    if gamestate == 6: # main küsimine sealt serverilt 
         print("gamestate 6", port)
         print("joined_port: ", joined_port)
         
