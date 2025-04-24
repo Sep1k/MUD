@@ -60,7 +60,7 @@ elif mapik == 2:
                                       \__Juhtruum             '''
     
 
-with open('filaes/mängijate nimekiri', 'w') as file:
+with open('filaes/kalurinimined.txt', 'w') as file:
     pass
     print("Server: salvestan_mängija nime")
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -82,7 +82,7 @@ def Game_brain(data):
         Mkorrad += 1
         return f"Mappi on vaadatud {Mkorrad}"
     elif data == "name":
-        with open('filaes/mängijate nimekiri','r') as file3:
+        with open('filaes/kalurinimined.txt','r') as file3:
             
             return file3
     else:
@@ -114,30 +114,30 @@ while True:
             print("SERVER: Kontrollin nime")
             print(data)
             name = data.split()
-            name2 = name[1]
+            name2 = name[1] # Viga tekkis siin !!!! äkki vahetada ära asukoht nameisindata ja nime vahel.
             print(name2)
 
 
             player_location = "pold"
-            with open('filaes/mängijate nimekiri', 'a') as file:
+            with open('filaes/kalurinimined.txt', 'a') as file:
                 print("Server: salvestan mängija nime")
                 try:
-                    with open('filaes/mängijate nimekiri', 'r') as file: 
+                    with open('filaes/kalurinimined.txt', 'r') as file: 
                         print("Server: Kontrollin mängija nime")
                         if name2 in file:
                             client_socket.sendall("nimi ei ole saadaval".encode('utf-8'))
                             print("SERVER: nimi ei ole saadaval")
                             continue 
                         else:
-                            with open('filaes/mängijate nimekiri', 'a') as append_file: 
+                            with open('filaes/kalurinimined.txt', 'a') as append_file: 
                                 append_file.write(name2 + '\n') 
                                 print("Server: salvestan mängija nime")
                                 client_socket.sendall("nimi on saadaval".encode('utf-8'))
                 except FileNotFoundError:
-                    with open('filaes/mängijate nimekiri', 'a') as append_file:
+                    with open('filaes/kalurinimined.txt', 'a') as append_file:
                         append_file.write(name2 + '\n') 
                         client_socket.sendall("nimi on saadaval".encode('utf-8'))
-                with open('filaes/mängijate nimekiri', 'w') as file:
+                with open('filaes/kalurinimined.txt', 'w') as file:
                     file.write(str(name2) + " 200 " +  "\n" )
             client_socket.sendall("server sai nime katte".encode('utf-8'))
         if data == "Kas mäng on alanud liitunud????":

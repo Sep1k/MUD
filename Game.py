@@ -6,6 +6,7 @@ import re
 import random
 import time
 import threading
+import os
 
 hostname = socket.gethostname()
 ip =  socket.gethostbyname(hostname)
@@ -172,7 +173,18 @@ def check_server():
 def nime_panemine_c():
     global gamestate, data, client_socket
     
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     saadetis = f"nameisindata {name}"
+    if saadetis == "nameisindata" and saadetis == "nameisindata ":
+        print("nimi on tühi")
+        logo_text.config(state=NORMAL)
+        logo_text.delete("1.0", END)
+        logo_art += (str("\ninvalid name. Try again"))
+        logo_text.insert(END, logo_art)
+        logo_text.config(state=DISABLED)
+        logo_text.see(END)
+        input_text.delete("1.0", END)
+        return
     print("nimi mille saatis client serverile", saadetis)
     client_socket.connect((joined_ip, int(joined_port)))
     client_socket.sendall(saadetis.encode('utf-8'))
@@ -383,10 +395,8 @@ def capture_enter(event):
         name += ""
         print(name)
         print(port)
-        with open('filaes/kalurinimined.txt', 'w') as file: 
-            pass #millegipärast kui fail kirjutamiseks avada ja sinna mitte midagi kirjutada kustutatakse selle sisu.
         with open('filaes/kalurinimined.txt', 'w') as file:
-            file.write(name)
+            file.write(f"{name} 200 põld\n")
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             client_socket.connect((ip, int(port)))
@@ -407,7 +417,7 @@ def capture_enter(event):
             gamestate = 7
 
         except Exception as e:
-            print(f"Serverile ei jõudnud nimi kohale")
+            print(f"Serverile ei jõudnud nimi kohale 234")
             print(e)
 
         finally:
