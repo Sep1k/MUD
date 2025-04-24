@@ -168,9 +168,21 @@ def check_server():
             print(f"Tekkis viga: {e}")
 
         # Kutsume 'check_server' funktsiooni uuesti 1 sekundi pärast
-        root.after(1000, check_server)
+        root.after(1000, check_server())
 def nime_panemine_c():
-    global gamestate, data
+    global gamestate, data, client_socket
+    
+    saadetis = f"nameisindata {name}"
+    print("nimi mille saatis client serverile", saadetis)
+    client_socket.connect((joined_ip, int(joined_port)))
+    client_socket.sendall(saadetis.encode('utf-8'))
+    data = client_socket.recv(1024)
+    
+    # client_socket.close()
+    print(data)
+    print("saavutasin ühenduse serveriga saates nime")
+    
+    
     if data == b"nimi on saadaval":
         gamestate = 6
         print(f"Server alustas mängu {data.decode('utf-8')}")
@@ -183,14 +195,15 @@ def nime_panemine_c():
             logo_text.config(state=DISABLED)
             logo_text.see(END)
             input_text.delete("1.0", END)
+            logo_text.config(state=Tk.DISABLED)
             # Use after() to simulate a delay before continuing with the next step
-            def delayed_disable():
-                try:
-                    logo_text.config(state=Tk.DISABLED)
-                except:
-                    pass
+            #def delayed_disable():
+            #    try:
+            #        logo_text.config(state=Tk.DISABLED)
+            #    except:
+            #        pass
             # Schedule delayed_disable() to be called after 3 seconds (3000ms)
-            root.after(3000, delayed_disable)
+            #root.after(3000, delayed_disable())
         except:
             print("tekib viga gamestate 5")
     elif data == "nimi ei ole saadaval":
@@ -202,7 +215,7 @@ def nime_panemine_c():
         logo_text.config(state=DISABLED)
         logo_text.see(END)
         input_text.delete("1.0", END)
-        nime_panemine_c()
+        
         return
 
 
@@ -411,16 +424,7 @@ def capture_enter(event):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         
         try:
-            saadetis = f"nameisindata {name}"
-            print(saadetis)
-            client_socket.connect((joined_ip, int(joined_port)))
-            client_socket.sendall(saadetis.encode('utf-8'))
-            data = client_socket.recv(1024)
             
-            # client_socket.close()
-            print(data)
-            print("saavutasin ühenduse serveriga saates nime")
-         
             
             
             nime_panemine_c()
