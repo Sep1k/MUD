@@ -53,7 +53,7 @@ gamestate = 0
 
 root = Tk()  # Akna tegemine
 
-root.title("MUD Chickantis")
+root.title("MUD Chiclantis")
 icon = PhotoImage(file='filaes/gameicon.png')
 root.iconphoto(True, icon)
 
