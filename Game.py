@@ -8,6 +8,8 @@ import time
 import threading
 import os
 
+
+name = ""
 hostname = socket.gethostname()
 ip =  socket.gethostbyname(hostname)
 port = ""
@@ -171,8 +173,8 @@ def check_server():
         # Kutsume 'check_server' funktsiooni uuesti 1 sekundi pärast
         root.after(1000, check_server())
 def nime_panemine_c():
-    global gamestate, data, client_socket
-    
+    global gamestate, data, client_socket, name
+    print("siin on nimi mis saadetaks kohe serverile.", name)
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     saadetis = f"nameisindata {name}"
     if saadetis == "nameisindata" and saadetis == "nameisindata ":
@@ -197,6 +199,7 @@ def nime_panemine_c():
     
     if data == b"nimi on saadaval":
         gamestate = 6
+        print(name)
         print(f"Server alustas mängu {data.decode('utf-8')}")
         
         try:
@@ -249,7 +252,7 @@ def nime_panemine_c():
 
 
 def capture_enter(event):
-    global last_data, logo_art, root, ip, port, gamestate, joined_ip, joined_port, data
+    global last_data, logo_art, root, ip, port, gamestate, joined_ip, joined_port, data, name
     print(gamestate)
     current_data = input_text.get("1.0", END).strip() # võtab kirjutatud lõigu
    
