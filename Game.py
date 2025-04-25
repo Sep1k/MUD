@@ -120,11 +120,22 @@ new_data = ""
 joined_ip = ""
 joined_port = ""
 name = ""
+luba_cliendil_jätkata = 0
+#-----------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------
+
+
+
+
 def is_valid_ip(ip_str):
     # Regex pattern to match valid IPv4 addresses
     pattern = r'^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
     return bool(re.match(pattern, ip_str))
 # Enteri peale salvestatakse kirjutuskasti sisu ja tehakse see tühjaks
+
+
+
+
 
 def check_port(port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -142,37 +153,55 @@ def check_port(port):
     finally:
         sock.close()
 
+
+
+
+
+
+
+
 def check_server():
     print("check_server")
-    global gamestate, data
+    global gamestate, data, luba_cliendil_jätkata
+    luba_cliendil_jätkata = 0
     if gamestate == 6:
-        return
+
+        return  # Game has started, no need to check server anymore
     else:
-        #viga peitub selle tsükli igaveses jooksmises. tuleb lisada mingi lõpetamise tingimus. ja server saadab kindal stri olenevalt, kas mängija saab liituda.
         try:
-            # Siin saad panna oma socketi ühenduse ja vastuvõtu koodi
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client_socket.settimeout(2)  # Lisame timeout, et vältida lõpmatut ooteaega
-            client_socket.connect((joined_ip, int(joined_port)))  # Muuda IP ja port vastavalt
+            client_socket.settimeout(2)  # Timeout to prevent infinite waiting
+            client_socket.connect((joined_ip, int(joined_port)))  # Use actual IP and port
             client_socket.sendall("Kas mäng on alanud liitunud????".encode('utf-8'))
-            data = client_socket.recv(4096)
+            
+            data = client_socket.recv(4096).decode('utf-8')  # Receive data and decode
+            print(f"Received data: {data}")  # For debugging
             
             if data:
-                logo_text.config(state=NORMAL)
-                logo_text.delete("1.0", END)
-                logo_art = "Game has started. type help for help! Go win!!!"
-                logo_text.insert(END, logo_art)
-                logo_text.config(state=DISABLED)
-                logo_text.see(END)
-                input_text.delete("1.0", END)
+                if data == "Mäng on alanud!!!!!":  # Make sure the server responds correctly
+                    logo_text.config(state=NORMAL)
+                    logo_text.delete("1.0", END)
+                    logo_art = "Game has started. type help for help! Go win!!!"
+                    logo_text.insert(END, logo_art)
+                    logo_text.config(state=DISABLED)
+                    logo_text.see(END)
+                    input_text.delete("1.0", END)
+                    gamestate = 6
+                    luba_cliendil_jätkata = 0
+                else:
+                    print(f"Unexpected server response: {data}")
             else:
-                # Kui serverilt ei saadud vastust, proovime uuesti
-                print("Ei saanud vastust serverilt, proovime uuesti...")
+                print("No data received from the server, retrying...")
         except Exception as e:
-            print(f"Tekkis viga: {e}")
+            print(f"Error while checking server: {e}")
 
-        # Kutsume 'check_server' funktsiooni uuesti 1 sekundi pärast
-        root.after(1000, check_server())
+        # Retry after 1000 ms if the game hasn't started
+        root.after(1000, check_server)
+
+
+
+
+
 def nime_panemine_c():
     global gamestate, data, client_socket, name
     print("siin on nimi mis saadetaks kohe serverile.", name)
@@ -254,6 +283,9 @@ def nime_panemine_c():
 
 def capture_enter(event):
     global last_data, logo_art, root, ip, port, gamestate, joined_ip, joined_port, data, name
+    if luba_cliendil_jätkata == 1:
+        print("Ei ole lubatud jätkata")
+        return
     print(gamestate)
     current_data = input_text.get("1.0", END).strip() # võtab kirjutatud lõigu
    
@@ -400,7 +432,7 @@ def capture_enter(event):
         print(name)
         print(port)
         with open('filaes/kalurinimined.txt', 'w') as file:
-            file.write(f"{name} 200 põld\n")
+            file.write(f"{name} põld 200 \n")
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             client_socket.connect((ip, int(port)))

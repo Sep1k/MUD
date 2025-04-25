@@ -1,6 +1,6 @@
 import socket
 # suva
-SERVER_IP = '172.20.2.26'  # Muuda see serveri tegelikuks IP-aadressiks
+SERVER_IP = '1.1.1.1'  # Muuda see serveri tegelikuks IP-aadressiks
 PORT = 12345
 
 while True:
@@ -24,5 +24,5 @@ while True:
     except Exception as e:
         print(f"Tekkis viga: {e}")
     finally:
-        client_socket.close()asds
+        client_socket.close()
 

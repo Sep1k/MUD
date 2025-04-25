@@ -69,6 +69,8 @@ server_socket.listen(5)
 
 print(f"Server kuulab {HOST}:{PORT}")
 
+koht = ["veski", "saun", "surnuaed", "aasa", "pööning", "maja", "mets", "koobas", "kelder", "kirik"]
+kohakordaja = 0
 q = "hello"
 Mkorrad = 0
 gamestatus = 0
@@ -118,30 +120,53 @@ while True:
             print(name2)
 
 
-            player_location = "pold"
-            with open('filaes/kalurinimined.txt', 'a') as file:
-                print("Server: salvestan mängija nime")
-                try:
-                    with open('filaes/kalurinimined.txt', 'r') as file: 
-                        print("Server: Kontrollin mängija nime")
-                        if name2 in file:
-                            client_socket.sendall("nimi ei ole saadaval".encode('utf-8'))
-                            print("SERVER: nimi ei ole saadaval")
-                            continue 
-                        else:
-                            with open('filaes/kalurinimined.txt', 'a') as append_file: 
-                                append_file.write(name2 + '\n') 
-                                print("Server: salvestan mängija nime")
-                                client_socket.sendall("nimi on saadaval".encode('utf-8'))
-                except FileNotFoundError:
-                    with open('filaes/kalurinimined.txt', 'a') as append_file:
-                        append_file.write(name2 + '\n') 
-                        client_socket.sendall("nimi on saadaval".encode('utf-8'))
-                with open('filaes/kalurinimined.txt', 'w') as file:
-                    file.write(str(name2) + " 200 " +  "\n" )
-            client_socket.sendall("server sai nime katte".encode('utf-8'))
-        if data == "Kas mäng on alanud liitunud????":
-            if alustatud == 1:
-                print("SERVER: saatsin kinnituse")
-                client_socket.sendall("Mäng on alanud!!!!!".encode('utf-8'))
+            with open('filaes/kalurinimined.txt', 'r') as fileforcheck:
+                print("Server: kontrollin mongija nime olemasolu")
+                if name2 in fileforcheck:
+                    print("SERVER: nimi ei ole saadaval")
+                    client_socket.sendall("nimi ei ole saadaval".encode('utf-8'))
+                    
+                elif name2 not in fileforcheck:
+                    asukoht = koht[kohakordaja]
+                    kohakordaja += 1
+                    if kohakordaja > 8:
+                        kohakordaja = 0
+                    print("SERVER: nimi on saadaval")
+                    client_socket.sendall("nimi on saadaval".encode('utf-8'))
+                    with open('filaes/kalurinimined.txt', 'a') as append_file: 
+                        append_file.write(name2 + asukoht +'200 \n') 
+                        print("Server: salvestan mängija nime")
+                        
+            # player_location = "pold"
+            # with open('filaes/kalurinimined.txt', 'a') as file:
+            #     print("Server: salvestan mängija nime")
+            #     try:
+            #         with open('filaes/kalurinimined.txt', 'r') as file: 
+            #             print("Server: Kontrollin mängija nime")
+            #             if name2 in file:
+            #                 client_socket.sendall("nimi ei ole saadaval".encode('utf-8'))
+            #                 print("SERVER: nimi ei ole saadaval")
+            #                 continue 
+            #             else:
+            #                 with open('filaes/kalurinimined.txt', 'a') as append_file: 
+            #                     append_file.write(name2 + '\n') 
+            #                     print("Server: salvestan mängija nime")
+            #                     client_socket.sendall("nimi on saadaval".encode('utf-8'))
+            #     except FileNotFoundError:
+            #         with open('filaes/kalurinimined.txt', 'a') as append_file:
+            #             append_file.write(name2 + '\n') 
+            #             client_socket.sendall("nimi on saadaval".encode('utf-8'))
+            #     with open('filaes/kalurinimined.txt', 'w') as file:
+            #         file.write(str(name2) + " 200 " +  "\n" )
+            # client_socket.sendall("server sai nime katte".encode('utf-8'))
+        print("Srever: kas client küsis, kas mäng on alanud")
+        print(data)
+        try:    
+            if data == "Kas mäng on alanud liitunud????":
+                if alustatud == 1:
+                    print("SERVER: saatsin kinnituse")
+                    client_socket.sendall("Mäng on alanud!!!!!".encode('utf-8'))
+        except:
+            print("SERVER: error")
+
     client_socket.close()
