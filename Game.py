@@ -647,3 +647,11 @@ input_text.bind("<Return>", capture_enter)
 
 
 mainloop()
+
+
+#      _|__| 
+#    /000000\
+#   /00000000|
+#   ""   {000|> 
+#        ¤0_0|
+#         "¤" 

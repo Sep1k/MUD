@@ -117,7 +117,6 @@ while True:
             name2 = name[1] # Viga tekkis siin !!!! äkki vahetada ära asukoht nameisindata ja nime vahel.
             print(name2)
 
-
             player_location = "pold"
             with open('filaes/kalurinimined.txt', 'a') as file:
                 print("Server: salvestan mängija nime")
