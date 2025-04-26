@@ -283,7 +283,8 @@ def capture_enter(event):
 
         # Your existing code for constructing message
 
-        message = current_data
+        message = str(name + (";") + current_data)
+        print(name)
         logo_art += str("\n" + str(current_data))
         logo_text.config(state=NORMAL)  
         logo_text.delete(1.0, END)
@@ -396,11 +397,13 @@ def capture_enter(event):
 
     if gamestate == 8:
         name = current_data
-        name += ""
+        name = str("nameisindata " + name)
         print(name)
         print(port)
-        with open('filaes/kalurinimined.txt', 'w') as file:
-            file.write(f"{name} 200 põld\n")
+        #with open('filaes/kalurinimined.txt', 'w') as file:
+       #     file.write(f"{name} 200 põld\n")
+       # client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             client_socket.connect((ip, int(port)))

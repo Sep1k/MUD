@@ -73,20 +73,238 @@ q = "hello"
 Mkorrad = 0
 gamestatus = 0
 alustatud = 0
-def Game_brain(data):
-    global q, Mkorrad
-    data = data.lower()
-    if data in ["tere", "hi", "hello", "you"]:
-        return "Tere"
-    elif data == "map":
-        Mkorrad += 1
-        return f"Mappi on vaadatud {Mkorrad}"
-    elif data == "name":
-        with open('filaes/kalurinimined.txt','r') as file3:
+
+class Item:
+    def __init__(self, name: str, nutra: int):
+        self.name = name
+        self.nutra = nutra
+
+class Room:
+    def __init__(self, name: str):
+        self.name = name
+        self.connectedRooms = []
+        self.items = []
+        self.previousRoom = None
+        self.isLast = False
+
+
+    def addRoomConnection(self, room):
+        self.connectedRooms.append(room)
+        if not room.isLast:
+            room.previousRoom = self
+    def getRoomConnections(self):
+        return self.connectedRooms
+    def getRoomByName(self, name: str):
+        for room in self.connectedRooms:
+            if room.name == name:
+                return room 
+    def printConnections(self):
+        for room in self.connectedRooms:
+            print(room.name)
+
+    def addItem(self, item: Item):
+        self.items.append(item)
+
+    def getItemInRoomByName(self, itemName: str):
+        found = False
+        for item in self.items:
+            if itemName == item.name:
+                found = True
+                return item
+        if not found: print("No item Found !!!")
+
+
+
+class Player:
+    def __init__(self, name: str, currentroom: Room):
+        self.name = name
+        self.currentRoom = currentroom
+        self.health = 100
+        self.maxHealth = 150
+        self.damage = 20
+        self.inv = []
+
+    def goToRoom(self, roomToGo: Room):
+        self.currentRoom = roomToGo
+
+    def pickup(self, itemToPick: str, roomFromWherePicked: Room):
+        self.inv.append(self.currentRoom.getItemInRoomByName(itemToPick))
+        for item in roomFromWherePicked.items:
+            if item.name == itemToPick:
+                roomFromWherePicked.items.remove(item)
+                break
+    
+    def removeItemFromInv(self, itemName: str):
+        for item in self.inv:
+            if item.name == itemName:
+                self.inv.remove(item)
+
+    def addHealth(self, amount: int):
+        self.health =  max(0, min(self.health + amount, self.maxHealth))
+        
+    def printInv(self):
+        print("Invetory")
+        for item in self.inv:
+            print(item)
+
+
+class Game:
+    def __init__(self, superRoom: Room):
+        self.players = []
+        self.room = superRoom
+        self.room.isLast = True
+
+    def recRoomHelpper(self, name: str, room: Room):
+        for rooma in room.connectedRooms:
+            if rooma.name == name:
+                return rooma
+            else:
+                found = self.recRoomHelpper(name, rooma)
+                if found: return found
+        return None 
+
+    def getRoomByNameFromAll(self, shearchableRoomName: str):
+        for room in self.room.connectedRooms:
+            if room.name == shearchableRoomName:
+                return room
+            else:
+                found = self.recRoomHelpper(shearchableRoomName, room)
+                if found: return found
+        return None 
+
+    def command(self, playerName: str, command: str):
+        if command == "": #Kui ei command on tühi siis lõppetab
+            print("Co Command were given!")
+            return
+        ina = command.split()
+        cplayer = self.getPlayerByName(playerName)
+        if cplayer == None:
+            print(f"Player not found! '{playerName}' is not a player!")
+            return
+        if ina[0] == "look":
+            print(f"You see: ")
+            cplayer.currentRoom.printConnections()
+        elif ina[0] == "go":
+            gotThrough = False
+            for room in cplayer.currentRoom.connectedRooms:
+                if room.name == ina[1]:
+                    gotThrough = True
+                    cplayer.goToRoom(room)
+                    print(f"{cplayer.name} läks {room.name}!")
+            if gotThrough == False: print(f'Pragu nimega "{ina[1]}" ei leitud!')
+        elif ina[0] == "back":
+            if cplayer.currentRoom.previousRoom != None:
+                cplayer.goToRoom(cplayer.currentRoom.previousRoom)
+            else: 
+                print("The gate off Hell is closed for you!")
+        elif ina[0] == "scan":
+            print("In the room are: ")
+            for item in cplayer.currentRoom.items:
+                print(f" - {item.name}")
+
+            print("There are also people: ")
+            for player in self.players:
+                if self.isPlayerInSameRoom(cplayer, player) and (player.name != cplayer.name):
+                    print(f" - {player.name}")
+        elif ina[0] == "where":
+            roomChain = " <-- You are here!"
+            WhereCCR = cplayer.currentRoom
+            roomChain = WhereCCR.name + roomChain 
+            temp_room = WhereCCR
+            while temp_room.previousRoom is not None:
+                temp_room = temp_room.previousRoom
+                roomChain = f"{temp_room.name} --> " + roomChain
             
-            return file3
-    else:
-        return "Vigane command"
+            print(roomChain)
+        elif ina[0] == "pick":
+            picked = False
+            for item in cplayer.currentRoom.items:
+                if item.name == ina[1]:
+                    picked = True
+                    print(f"picked up {ina[1]}!")
+                    cplayer.pickup(ina[1], cplayer.currentRoom)
+            if not picked: print(f"No item found with name: {ina[1]}")
+        elif ina[0] == "inv":
+            print("Items in pockets:")
+            if cplayer.inv:
+                for item in cplayer.inv:
+                    print(f" - {item.name}")
+            else:
+                print("Nothing")
+        elif ina[0] == "eat":
+            for item in cplayer.inv:
+                if item.name == ina[1]:
+                    if item.nutra != 0:
+                        cplayer.removeItemFromInv(ina[1])
+                        cplayer.addHealth(item.nutra)
+                        print(f"You ate {ina[1]}")
+                    else:
+                        print("Your mouth doesn't exept it as food!")
+        elif ina[0] == "health":
+            print(f"You have health of {cplayer.health}")
+        elif ina[0] == "hit":
+            for player in game.players:
+                if player.name != ina[1]: continue
+                if player.currentRoom == cplayer.currentRoom:
+                    player.addHealth(-(cplayer.damage))
+                    print(f"Hit player {player.name} for damage of {cplayer.damage}")
+        
+        else:
+            print("unknown command")
+            
+
+    
+    def joinPlayer(self, playerName):
+        print(f"Player '{playerName}' joined the game!")
+        self.players.append(Player(playerName, self.room))
+
+    def getPlayerByName(self, playerName: str):
+        for player in self.players:
+            if player.name == playerName:
+                return player
+    
+    def isPlayerInSameRoom(self, og: Player, bg:Player):
+        if og.currentRoom == bg.currentRoom:
+            return True
+
+    def myfunc(self):
+        print("Hello my name is " + self.name)
+
+
+game = Game(Room("aed"))
+
+def setUpGame(game: Game):
+
+    game.room.addRoomConnection(Room("Kelder"))
+    game.room.addRoomConnection(Room("Kirik"))
+    game.room.addItem(Item("Kepp", 0))
+    game.room.addItem(Item("oun", 20))
+    game.room.addItem(Item("Liha", -30))
+    game.room.addItem(Item("Seppik", 100))
+
+    game.room.getRoomByName("Kirik").addRoomConnection(Room("Torn"))
+    game.room.getRoomByName("Kirik").addRoomConnection(Room("Kabel"))
+
+    game.getRoomByNameFromAll("Torn").addRoomConnection(game.room)
+
+    game.getRoomByNameFromAll("Kelder").addRoomConnection(Room("Moosi-purk"))
+
+setUpGame(game)
+
+# def Game_brain(data):
+#     global q, Mkorrad
+#     data = data.lower()
+#     if data in ["tere", "hi", "hello", "you"]:
+#         return "Tere"
+#     elif data == "map":
+#         Mkorrad += 1
+#         return f"Mappi on vaadatud {Mkorrad}"
+#     elif data == "name":
+#         with open('filaes/kalurinimined.txt','r') as file3:
+            
+#             return file3
+#     else:
+#         return "Vigane command"
 
 while True:
     client_socket, addr = server_socket.accept()
@@ -100,9 +318,12 @@ while True:
         print("gamestatus", gamestatus)
         if int(gamestatus) == 2:
             print("server: " + f"Sõnum: {data}")
-
-            response = Game_brain(data)
-            client_socket.sendall(response.encode('utf-8'))
+        
+            saadud_command = data.split(";")
+            print("Server:", saadud_command)
+            #response = game.command(a[0], a[1])
+            game.command(saadud_command[0], saadud_command[1])
+            #client_socket.sendall(response.encode('utf-8'))
 
         elif data == "siia käib rida, mis käivitab server.":
             gamestatus = 2
@@ -117,6 +338,8 @@ while True:
             name2 = name[1] # Viga tekkis siin !!!! äkki vahetada ära asukoht nameisindata ja nime vahel.
             print(name2)
 
+            
+
             player_location = "pold"
             with open('filaes/kalurinimined.txt', 'a') as file:
                 print("Server: salvestan mängija nime")
@@ -129,16 +352,22 @@ while True:
                             continue 
                         else:
                             with open('filaes/kalurinimined.txt', 'a') as append_file: 
-                                append_file.write(name2 + '\n') 
-                                print("Server: salvestan mängija nime")
+                                append_file.write(name2 + '\n')
                                 client_socket.sendall("nimi on saadaval".encode('utf-8'))
+                                print("FUCK YOUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
+                                game.joinPlayer(name2)
+                                print(f"Server: salvestan mängija nime: '{name2}'")
                 except FileNotFoundError:
                     with open('filaes/kalurinimined.txt', 'a') as append_file:
                         append_file.write(name2 + '\n') 
                         client_socket.sendall("nimi on saadaval".encode('utf-8'))
+                        print("No File found!")
                 with open('filaes/kalurinimined.txt', 'w') as file:
                     file.write(str(name2) + " 200 " +  "\n" )
             client_socket.sendall("server sai nime katte".encode('utf-8'))
+
+            
+
         if data == "Kas mäng on alanud liitunud????":
             if alustatud == 1:
                 print("SERVER: saatsin kinnituse")
