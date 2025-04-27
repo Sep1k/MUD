@@ -74,10 +74,12 @@ Mkorrad = 0
 gamestatus = 0
 alustatud = 0
 
+
 class Item:
-    def __init__(self, name: str, nutra: int):
+    def __init__(self, name: str, nutra: int, aditionalDamage: int):
         self.name = name
         self.nutra = nutra
+        self.aditionalDamage = aditionalDamage
 
 class Room:
     def __init__(self, name: str):
@@ -99,8 +101,10 @@ class Room:
             if room.name == name:
                 return room 
     def printConnections(self):
+        asi = ""
         for room in self.connectedRooms:
-            print(room.name)
+            asi += f" - {room.name}\n"
+        return asi
 
     def addItem(self, item: Item):
         self.items.append(item)
@@ -123,6 +127,7 @@ class Player:
         self.maxHealth = 150
         self.damage = 20
         self.inv = []
+        self.isDead = False
 
     def goToRoom(self, roomToGo: Room):
         self.currentRoom = roomToGo
@@ -154,6 +159,13 @@ class Game:
         self.room = superRoom
         self.room.isLast = True
 
+    def resetPlayers(self):
+        for i in range(len(self.players)):
+            self.players[i] = Player(self.room)
+    
+    def emptyWorld(self):
+        pass #Doto - Ad function to cloar all the rooms and items from the world
+
     def recRoomHelpper(self, name: str, room: Room):
         for rooma in room.connectedRooms:
             if rooma.name == name:
@@ -178,84 +190,101 @@ class Game:
             return
         ina = command.split()
         cplayer = self.getPlayerByName(playerName)
-        if cplayer == None:
-            print(f"Player not found! '{playerName}' is not a player!")
-            return
-        if ina[0] == "look":
-            print(f"You see: ")
-            cplayer.currentRoom.printConnections()
-        elif ina[0] == "go":
-            gotThrough = False
-            for room in cplayer.currentRoom.connectedRooms:
-                if room.name == ina[1]:
-                    gotThrough = True
-                    cplayer.goToRoom(room)
-                    print(f"{cplayer.name} läks {room.name}!")
-            if gotThrough == False: print(f'Pragu nimega "{ina[1]}" ei leitud!')
-        elif ina[0] == "back":
-            if cplayer.currentRoom.previousRoom != None:
-                cplayer.goToRoom(cplayer.currentRoom.previousRoom)
-            else: 
-                print("The gate off Hell is closed for you!")
-        elif ina[0] == "scan":
-            print("In the room are: ")
-            for item in cplayer.currentRoom.items:
-                print(f" - {item.name}")
-
-            print("There are also people: ")
-            for player in self.players:
-                if self.isPlayerInSameRoom(cplayer, player) and (player.name != cplayer.name):
-                    print(f" - {player.name}")
-        elif ina[0] == "where":
-            roomChain = " <-- You are here!"
-            WhereCCR = cplayer.currentRoom
-            roomChain = WhereCCR.name + roomChain 
-            temp_room = WhereCCR
-            while temp_room.previousRoom is not None:
-                temp_room = temp_room.previousRoom
-                roomChain = f"{temp_room.name} --> " + roomChain
-            
-            print(roomChain)
-        elif ina[0] == "pick":
-            picked = False
-            for item in cplayer.currentRoom.items:
-                if item.name == ina[1]:
-                    picked = True
-                    print(f"picked up {ina[1]}!")
-                    cplayer.pickup(ina[1], cplayer.currentRoom)
-            if not picked: print(f"No item found with name: {ina[1]}")
-        elif ina[0] == "inv":
-            print("Items in pockets:")
-            if cplayer.inv:
-                for item in cplayer.inv:
-                    print(f" - {item.name}")
-            else:
-                print("Nothing")
-        elif ina[0] == "eat":
-            for item in cplayer.inv:
-                if item.name == ina[1]:
-                    if item.nutra != 0:
-                        cplayer.removeItemFromInv(ina[1])
-                        cplayer.addHealth(item.nutra)
-                        print(f"You ate {ina[1]}")
-                    else:
-                        print("Your mouth doesn't exept it as food!")
-        elif ina[0] == "health":
-            print(f"You have health of {cplayer.health}")
-        elif ina[0] == "hit":
-            for player in game.players:
-                if player.name != ina[1]: continue
-                if player.currentRoom == cplayer.currentRoom:
-                    player.addHealth(-(cplayer.damage))
-                    print(f"Hit player {player.name} for damage of {cplayer.damage}")
         
-        else:
-            print("unknown command")
+        if ina[0] == "msg":
+            msg = ""
+            for m in ina[1:]:
+                msg += f" {m}"
             
+            return str(f"{cplayer.name} sayd: {msg}")
+        elif ina[0] == "reset-players":
+            self.resetPlayers()   
+            return str("Players have been reset!")
+        
+        if cplayer.health <= 0:
+            return str("You are dead")
+        else:
+            if ina[0] == "look":
+                asi = (f"You see: \n")
+                n = cplayer.currentRoom.printConnections()
+                return n
+            elif ina[0] == "go":
+                gotThrough = False
+                asi = ""
+                for room in cplayer.currentRoom.connectedRooms:
+                    if room.name == ina[1]:
+                        gotThrough = True
+                        cplayer.goToRoom(room)
+                        asi += (f"{cplayer.name} läks {room.name}!\n")
+                        
+                if gotThrough == False: asi += (f'Pragu nimega "{ina[1]}" ei leitud!')
+                return asi
+            elif ina[0] == "back":
+                if cplayer.currentRoom.previousRoom != None:
+                    cplayer.goToRoom(cplayer.currentRoom.previousRoom)
+                else: 
+                    print("The gate off Hell is closed for you!")
+            elif ina[0] == "scan":
+                print("In the room are: ")
+                for item in cplayer.currentRoom.items:
+                    print(f" - {item.name}")
+
+                print("There are also people: ")
+                for player in self.players:
+                    if self.isPlayerInSameRoom(cplayer, player) and (player.name != cplayer.name):
+                        print(f" - {player.name}")
+            elif ina[0] == "where":
+                roomChain = " <-- You are here!"
+                WhereCCR = cplayer.currentRoom
+                roomChain = WhereCCR.name + roomChain 
+                temp_room = WhereCCR
+                while temp_room.previousRoom is not None:
+                    temp_room = temp_room.previousRoom
+                    roomChain = f"{temp_room.name} --> " + roomChain
+                
+                print(roomChain)
+            elif ina[0] == "pick":
+                picked = False
+                for item in cplayer.currentRoom.items:
+                    if item.name == ina[1]:
+                        picked = True
+                        print(f"picked up {ina[1]}!")
+                        cplayer.pickup(ina[1], cplayer.currentRoom)
+                if not picked: print(f"No item found with name: {ina[1]}")
+            elif ina[0] == "inv":
+                print("Items in pockets:")
+                if cplayer.inv:
+                    for item in cplayer.inv:
+                        print(f" - {item.name}")
+                else:
+                    print("Nothing")
+            elif ina[0] == "eat":
+                for item in cplayer.inv:
+                    if item.name == ina[1]:
+                        if item.nutra != 0:
+                            cplayer.removeItemFromInv(ina[1])
+                            cplayer.addHealth(item.nutra)
+                            print(f"You ate {ina[1]}")
+                        else:
+                            print("Your mouth doesn't exept it as food!")
+            elif ina[0] == "health":
+                print(f"You have health of {cplayer.health}")
+            elif ina[0] == "hit":
+                for player in game.players:
+                    if player.name != ina[1]: continue
+                    if player.currentRoom == cplayer.currentRoom:
+                        damage = cplayer.damage
+                        for item in cplayer.inv:
+                            damage += item.aditionalDamage
+                        player.addHealth(-damage)
+                        print(f"Hit player {player.name} for damage of {damage}")
+            else:
+                print("unknown command")
+        
+        
 
     
     def joinPlayer(self, playerName):
-        print(f"Player '{playerName}' joined the game!")
         self.players.append(Player(playerName, self.room))
 
     def getPlayerByName(self, playerName: str):
@@ -268,19 +297,21 @@ class Game:
             return True
 
     def myfunc(self):
-        print("Hello my name is " + self.name)
+        return ("Hello my name is server!")
+
 
 
 game = Game(Room("aed"))
 
 def setUpGame(game: Game):
-
+    game.joinPlayer("A")
+    game.joinPlayer("B")
     game.room.addRoomConnection(Room("Kelder"))
     game.room.addRoomConnection(Room("Kirik"))
-    game.room.addItem(Item("Kepp", 0))
-    game.room.addItem(Item("oun", 20))
-    game.room.addItem(Item("Liha", -30))
-    game.room.addItem(Item("Seppik", 100))
+    game.room.addItem(Item("Kepp", 0, 50))
+    game.room.addItem(Item("oun", 20, 0))
+    game.room.addItem(Item("Liha", -30, 0))
+    game.room.addItem(Item("Seppik", 100, 0))
 
     game.room.getRoomByName("Kirik").addRoomConnection(Room("Torn"))
     game.room.getRoomByName("Kirik").addRoomConnection(Room("Kabel"))
@@ -321,9 +352,8 @@ while True:
         
             saadud_command = data.split(";")
             print("Server:", saadud_command)
-            #response = game.command(a[0], a[1])
-            game.command(saadud_command[0], saadud_command[1])
-            #client_socket.sendall(response.encode('utf-8'))
+            response = str(game.command(saadud_command[0], saadud_command[1]))
+            client_socket.sendall(response.encode('utf-8'))
 
         elif data == "siia käib rida, mis käivitab server.":
             gamestatus = 2
@@ -354,9 +384,7 @@ while True:
                             with open('filaes/kalurinimined.txt', 'a') as append_file: 
                                 append_file.write(name2 + '\n')
                                 client_socket.sendall("nimi on saadaval".encode('utf-8'))
-                                print("FUCK YOUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU")
                                 game.joinPlayer(name2)
-                                print(f"Server: salvestan mängija nime: '{name2}'")
                 except FileNotFoundError:
                     with open('filaes/kalurinimined.txt', 'a') as append_file:
                         append_file.write(name2 + '\n') 

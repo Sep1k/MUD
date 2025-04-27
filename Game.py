@@ -270,6 +270,10 @@ def capture_enter(event):
     current_data.lower
     print(current_data)
     if gamestate == 6: # main küsimine sealt serverilt 
+        if "nameisindata" in name:
+            name = name .split()
+            name = name[1]
+
         print("gamestate 6", port)
         print("joined_port: ", joined_port)
         
