@@ -222,17 +222,20 @@ class Game:
             elif ina[0] == "back":
                 if cplayer.currentRoom.previousRoom != None:
                     cplayer.goToRoom(cplayer.currentRoom.previousRoom)
+                    return str(f"{cplayer.name} went back!\n")
                 else: 
-                    print("The gate off Hell is closed for you!")
+                    return str("The gate off Hell is closed for you!")
             elif ina[0] == "scan":
-                print("In the room are: ")
+                scanitavad = "Items: \n"
                 for item in cplayer.currentRoom.items:
-                    print(f" - {item.name}")
+                    scanitavad += (f" - {item.name}\n")
 
-                print("There are also people: ")
+                scanitavad += ("Players: \n")
                 for player in self.players:
-                    if self.isPlayerInSameRoom(cplayer, player) and (player.name != cplayer.name):
-                        print(f" - {player.name}")
+                    if self.isPlayerInSameRoom(cplayer, player) and (player.name != cplayer.name) and (player.health > 0):
+                        scanitavad +=(f" - {player.name}\n")
+                return str(scanitavad)
+                
             elif ina[0] == "where":
                 roomChain = " <-- You are here!"
                 WhereCCR = cplayer.currentRoom
@@ -255,7 +258,8 @@ class Game:
                 print("Items in pockets:")
                 if cplayer.inv:
                     for item in cplayer.inv:
-                        print(f" - {item.name}")
+                        silm += (f" - {item.name}")
+                    return str(silm)
                 else:
                     print("Nothing")
             elif ina[0] == "eat":
@@ -266,9 +270,9 @@ class Game:
                             cplayer.addHealth(item.nutra)
                             print(f"You ate {ina[1]}")
                         else:
-                            print("Your mouth doesn't exept it as food!")
+                            print("Your mouth doesn't accept it as food!")
             elif ina[0] == "health":
-                print(f"You have health of {cplayer.health}")
+               return str(f"You have health of {cplayer.health}")
             elif ina[0] == "hit":
                 for player in game.players:
                     if player.name != ina[1]: continue
@@ -277,9 +281,9 @@ class Game:
                         for item in cplayer.inv:
                             damage += item.aditionalDamage
                         player.addHealth(-damage)
-                        print(f"Hit player {player.name} for damage of {damage}")
+                        return str(f"Hit player {player.name} for damage of {damage}")
             else:
-                print("unknown command")
+                return str("unknown command")
         
         
 
@@ -304,21 +308,22 @@ class Game:
 game = Game(Room("aed"))
 
 def setUpGame(game: Game):
-    game.joinPlayer("A")
-    game.joinPlayer("B")
-    game.room.addRoomConnection(Room("Kelder"))
-    game.room.addRoomConnection(Room("Kirik"))
-    game.room.addItem(Item("Kepp", 0, 50))
+    game.room.addRoomConnection(Room("kelder"))
+    game.room.addRoomConnection(Room("kirik"))
+    game.room.addItem(Item("kepp", 0, 50))
     game.room.addItem(Item("oun", 20, 0))
-    game.room.addItem(Item("Liha", -30, 0))
-    game.room.addItem(Item("Seppik", 100, 0))
+    game.room.addItem(Item("liha", -30, 0))
+    game.room.addItem(Item("seppik", 100, 0))
 
-    game.room.getRoomByName("Kirik").addRoomConnection(Room("Torn"))
-    game.room.getRoomByName("Kirik").addRoomConnection(Room("Kabel"))
+    game.room.getRoomByName("kirik").addRoomConnection(Room("torn"))
+    game.room.getRoomByName("kirik").addRoomConnection(Room("kabel"))
 
-    game.getRoomByNameFromAll("Torn").addRoomConnection(game.room)
+    game.room.getRoomByName("kelder").addItem(Item("kont", 100, 0))
 
-    game.getRoomByNameFromAll("Kelder").addRoomConnection(Room("Moosi-purk"))
+
+    game.getRoomByNameFromAll("torn").addRoomConnection(game.room)
+
+   # game.getRoomByNameFromAll("kelder").addRoomConnection(Room("moosi-purk"))
 
 setUpGame(game)
 
