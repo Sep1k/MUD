@@ -370,7 +370,7 @@ while True:
             print("SERVER: Kontrollin nime")
             print(data)
             name = data.split()
-            name2 = name[1] # Viga tekkis siin !!!! äkki vahetada ära asukoht nameisindata ja nime vahel.
+            name2 = name[1] 
             print(name2)
 
             
